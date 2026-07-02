@@ -23,7 +23,12 @@ public class StaffFrame extends JFrame {
     private TimePanel timePicker = new TimePanel();
 
     private DefaultTableModel model = new DefaultTableModel(
-            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态"},0);
+            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态"}, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public StaffFrame(User user) {
         this.user = user;
@@ -105,14 +110,22 @@ public class StaffFrame extends JFrame {
 
     private void addReservation() {
         try {
+            // 1) 解析会议室ID（兼容： "3 - xxx" / "3 xxx" / "3:xxx"）
             String roomText = (String) cbRoom.getSelectedItem();
-            if (roomText == null || roomText.trim().length() == 0) {
+            if (roomText == null || roomText.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "请先选择会议室");
                 return;
             }
 
-            long roomId = Long.parseLong(roomText.split(" - ")[0].trim());
+            String t = roomText.trim();
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^(\\d+)").matcher(t);
+            if (!matcher.find()) {
+                JOptionPane.showMessageDialog(this, "会议室数据格式异常，请刷新后重试");
+                return;
+            }
+            long roomId = Long.parseLong(matcher.group(1));
 
+            // 2) 时间获取与校验
             Timestamp start = DateTimeUtil.getTime(timePicker.getStartText());
             Timestamp end = DateTimeUtil.getTime(timePicker.getEndText());
 
@@ -121,12 +134,45 @@ public class StaffFrame extends JFrame {
                 return;
             }
 
-            int count = Integer.parseInt(tfCount.getText().trim());
+            // 3) 会议主题校验
+            String topic = tfTopic.getText() == null ? "" : tfTopic.getText().trim();
+            if (topic.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "会议主题不能为空");
+                return;
+            }
+
+            // 4) 参会人数校验（支持全角数字）
+            String countText = tfCount.getText();
+            if (countText == null) countText = "";
+            countText = countText.trim()
+                    .replace('０','0').replace('１','1').replace('２','2')
+                    .replace('３','3').replace('４','4').replace('５','5')
+                    .replace('６','6').replace('７','7').replace('８','8').replace('９','9');
+
+            if (!countText.matches("\\d+")) {
+                JOptionPane.showMessageDialog(this, "参会人数必须是数字（例如：10）");
+                return;
+            }
+            int count = Integer.parseInt(countText);
+            MeetingRoomDAO roomDAO = new MeetingRoomDAO();
+            int capacity = roomDAO.getCapacityByRoomId(roomId);
+            if (capacity <= 0) {
+                JOptionPane.showMessageDialog(this, "读取会议室容量失败，请刷新后重试");
+                return;
+            }
+            if (count > capacity) {
+                JOptionPane.showMessageDialog(this, "参会人数超出会议室容量上限（最大 " + capacity + " 人）");
+                return;
+            }
             if (count <= 0) {
                 JOptionPane.showMessageDialog(this, "参会人数必须大于0");
                 return;
             }
 
+            // 5) 备注
+            String desc = tfDesc.getText() == null ? "" : tfDesc.getText().trim();
+
+            // 6) 冲突校验 + 提交
             ReservationDAO dao = new ReservationDAO();
             if (dao.hasConflict(roomId, start, end)) {
                 JOptionPane.showMessageDialog(this, "会议室时间冲突，请更换时间或会议室");
@@ -134,24 +180,25 @@ public class StaffFrame extends JFrame {
             }
 
             boolean ok = dao.addReservation(
-                    tfTopic.getText().trim(),
+                    topic,
                     user.getDeptID(),
                     user.getStaffID(),
                     roomId,
-                    start, end,
+                    start,
+                    end,
                     count,
-                    tfDesc.getText().trim()
+                    desc
             );
 
-            JOptionPane.showMessageDialog(this, ok ? "提交成功（待确认）" : "提交失败");
-            if (ok) loadMyReservations();
+            JOptionPane.showMessageDialog(this, ok ? "提交成功（待确认）" : "提交失败，请稍后重试");
+            if (ok) {
+                loadMyReservations();
+            }
 
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "参会人数必须是数字");
-        } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, "日期不合法，请检查年月日");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "输入有误，请检查后重试");
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "时间格式错误，请检查日期与时间选择");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "提交失败：" + e.getMessage());
         }
     }
 

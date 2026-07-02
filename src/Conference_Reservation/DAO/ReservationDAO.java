@@ -64,14 +64,18 @@ public class ReservationDAO {
         }
     }
 
-    public List<ReservationList> searchMyReservation(long applicant_id) {
+    public List<ReservationList> searchMyReservation(double applicant_id) {
         List<ReservationList> list = new ArrayList<ReservationList>();
-        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+
+        String sql = "SELECT " +
+                "r.reservation_id, r.reservation_no, r.meeting_topic, " +
+                "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
-                "WHERE r.applicant_staff_id = ? ORDER BY r.created_at DESC";
+                "WHERE r.applicant_staff_id = ? " +
+                "ORDER BY r.created_at DESC";
+
         Connection con = null;
         PreparedStatement stm = null;
         ResultSet rs = null;
@@ -80,12 +84,13 @@ public class ReservationDAO {
             if (con == null) return list;
 
             stm = con.prepareStatement(sql);
-            stm.setLong(1, applicant_id);
+            stm.setDouble(1, applicant_id);
             rs = stm.executeQuery();
+
             while (rs.next()) {
                 ReservationList ri = new ReservationList();
                 ri.setReservationID((long) rs.getDouble("reservation_id"));
-                ri.setReservationNO(rs.getLong("reservation_no"));
+                ri.setReservationNO(rs.getString("reservation_no"));
                 ri.setMeetingTopic(rs.getString("meeting_topic"));
                 ri.setRoomName(rs.getString("room_name"));
                 ri.setStartTime(rs.getString("start_time"));
@@ -143,7 +148,7 @@ public class ReservationDAO {
             while (rs.next()) {
                 ReservationList ri = new ReservationList();
                 ri.setReservationID((long) rs.getDouble("reservation_id"));
-                ri.setReservationNO(rs.getLong("reservation_no"));
+                ri.setReservationNO(rs.getString("reservation_no"));
                 ri.setMeetingTopic(rs.getString("meeting_topic"));
                 ri.setRoomName(rs.getString("room_name"));
                 ri.setStartTime(rs.getString("start_time"));

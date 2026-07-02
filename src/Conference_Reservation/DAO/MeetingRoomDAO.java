@@ -31,4 +31,25 @@ public class MeetingRoomDAO {
         }
         return Room;
     }
+
+    public int getCapacityByRoomId(long roomId) {
+        String sql = "SELECT capacity FROM meeting_room WHERE room_id = ?";
+        Connection con = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            con = SqlUtil.getConnection();
+            stm = con.prepareStatement(sql);
+            stm.setLong(1, roomId);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("capacity");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            SqlUtil.closeAll(con, stm, rs);
+        }
+        return -1;
+    }
 }

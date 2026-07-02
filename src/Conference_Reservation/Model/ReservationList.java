@@ -2,7 +2,7 @@ package Conference_Reservation.Model;
 
 public class ReservationList {
     private long reservationID;
-    private long reservationNO;
+    private String reservationNO;
     private String roomName;
     private String meetingTopic;
     private long applicantID;
@@ -18,10 +18,10 @@ public class ReservationList {
         this.reservationID = reservationID;
     }
 
-    public long getReservationNO() {
+    public String getReservationNO() {
         return reservationNO;
     }
-    public void setReservationNO(long reservationNO) {
+    public void setReservationNO(String reservationNO) {
         this.reservationNO = reservationNO;
     }
 
