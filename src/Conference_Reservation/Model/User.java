@@ -1,16 +1,16 @@
 package Conference_Reservation.Model;
 
 public class User {
-    private double staffID;
+    private long staffID;
     private String staffNO;
     private String staffName;
-    private double deptID;
+    private long deptID;
     private String accessLevel;
 
-    public double getStaffID() {
+    public long getStaffID() {
         return staffID;
     }
-    public void setStaffID(double staffID) {
+    public void setStaffID(long staffID) {
         this.staffID = staffID;
     }
 
@@ -28,10 +28,10 @@ public class User {
         this.staffName = staffName;
     }
 
-    public double getDeptID() {
+    public long getDeptID() {
         return deptID;
     }
-    public void setDeptID(double deptID) {
+    public void setDeptID(long deptID) {
         this.deptID = deptID;
     }
 

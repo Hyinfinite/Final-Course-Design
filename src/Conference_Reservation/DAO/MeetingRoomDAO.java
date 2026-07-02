@@ -12,14 +12,17 @@ public class MeetingRoomDAO {
         List<String> Room = new ArrayList<String>();
         String sql = "SELECT room_id, room_name, capacity FROM meeting_room ORDER BY room_id";
         Connection con = null;
-        Statement stm = null;
+        PreparedStatement stm = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            stm = con.createStatement();
-            rs = stm.executeQuery(sql);
+            stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
             while (rs.next()) {
-                Room.add(rs.getDouble("room_id") + ": " + rs.getString("room_name") + "可容纳人数: " + rs.getInt("capacity"));
+                long id = rs.getLong("room_id");
+                String name = rs.getString("room_name");
+                int capacity = rs.getInt("capacity");
+                Room.add(id + " " + name + "(可容纳人数: " + capacity + ")");
             }
         } catch (Exception e) {
             e.printStackTrace();

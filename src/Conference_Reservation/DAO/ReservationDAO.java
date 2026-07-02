@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationDAO {
-    public boolean hasConflict(double room_id, Timestamp start_time, Timestamp end_time) {
+    public boolean hasConflict(long room_id, Timestamp start_time, Timestamp end_time) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE room_id = ? AND ((start_time < ? AND end_time > ?) AND process IN ('待确认', '已确认')";
         Connection con = null;
         PreparedStatement stm = null;
@@ -17,7 +17,7 @@ public class ReservationDAO {
         try {
             con = SqlUtil.getConnection();
             stm = con.prepareStatement(sql);
-            stm.setDouble(1, room_id);
+            stm.setLong(1, room_id);
             stm.setTimestamp(2, start_time);
             stm.setTimestamp(3, end_time);
             rs = stm.executeQuery();
@@ -32,7 +32,7 @@ public class ReservationDAO {
         return true;
     }
 
-    public boolean addReservation(String topic, double dept_id, double applicant_id, double room_id, Timestamp start_time, Timestamp end_time, int count, String desc) {
+    public boolean addReservation(String topic, long dept_id, long applicant_id, long room_id, Timestamp start_time, Timestamp end_time, int count, String desc) {
         String sql = "INSERT INTO reservation (reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, reservation_room_id, start_time, end_time, participant_count, meeting_desc, reservation_process) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '待确认')";
         Connection con = null;
@@ -42,9 +42,9 @@ public class ReservationDAO {
             stm = con.prepareStatement(sql);
             stm.setString(1, ReservationNOUtil.ReservationNO());
             stm.setString(2, topic);
-            stm.setDouble(3, dept_id);
-            stm.setDouble(4, applicant_id);
-            stm.setDouble(5, room_id);
+            stm.setLong(3, dept_id);
+            stm.setLong(4, applicant_id);
+            stm.setLong(5, room_id);
             stm.setTimestamp(6, start_time);
             stm.setTimestamp(7, end_time);
             stm.setInt(8, count);
@@ -58,7 +58,7 @@ public class ReservationDAO {
         }
     }
 
-    public List<ReservationList> searchMyReservation(double applicant_id) {
+    public List<ReservationList> searchMyReservation(long applicant_id) {
         List<ReservationList> list = new ArrayList<ReservationList>();
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, r.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name " +
                      "FROM reservation r JOIN meeting_room m ON r.room_id = m.room_id JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
@@ -73,8 +73,8 @@ public class ReservationDAO {
             rs = stm.executeQuery();
             while (rs.next()) {
                 ReservationList reservationInfo = new ReservationList();
-                reservationInfo.setReservationID(rs.getDouble("reservation_id"));
-                reservationInfo.setReservationNO(rs.getDouble("reservation_no"));
+                reservationInfo.setReservationID(rs.getLong("reservation_id"));
+                reservationInfo.setReservationNO(rs.getLong("reservation_no"));
                 reservationInfo.setMeetingTopic(rs.getString("meeting_topic"));
                 reservationInfo.setRoomName(rs.getString("room_name"));
                 reservationInfo.setStartTime(rs.getString("start_time"));
@@ -91,15 +91,15 @@ public class ReservationDAO {
         return list;
     }
 
-    public boolean cancelReservation(double reservation_id, double applicant_id) {
+    public boolean cancelReservation(long reservation_id, long applicant_id) {
         String sql = "UPDATE reservation SET reservation_process = '已取消' WHERE reservation_id = ? AND applicant_staff_id = ? AND reservation_process = '待确认'";
         Connection con = null;
         PreparedStatement stm = null;
         try {
             con = SqlUtil.getConnection();
             stm = con.prepareStatement(sql);
-            stm.setDouble(1, reservation_id);
-            stm.setDouble(2, applicant_id);
+            stm.setLong(1, reservation_id);
+            stm.setLong(2, applicant_id);
             return stm.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,8 +123,8 @@ public class ReservationDAO {
             rs = stm.executeQuery();
             while (rs.next()) {
                 ReservationList reservationInfo = new ReservationList();
-                reservationInfo.setReservationID(rs.getDouble("reservation_id"));
-                reservationInfo.setReservationNO(rs.getDouble("reservation_no"));
+                reservationInfo.setReservationID(rs.getLong("reservation_id"));
+                reservationInfo.setReservationNO(rs.getLong("reservation_no"));
                 reservationInfo.setMeetingTopic(rs.getString("meeting_topic"));
                 reservationInfo.setRoomName(rs.getString("room_name"));
                 reservationInfo.setStartTime(rs.getString("start_time"));

@@ -3,15 +3,15 @@ create database conference_system;
 use conference_system;
 
 create table department (
-	dept_id double primary key auto_increment,
+	dept_id bigint primary key auto_increment,
     dept_name varchar(100) not null
 );
     
 create table admin_staff (
-	staff_id double primary key auto_increment,
+	staff_id bigint primary key auto_increment,
     staff_no varchar(100) not null,
     staff_name varchar(100) not null,
-    dept_id double,
+    dept_id bigint,
     staff_password varchar(100) not null,
     gender varchar(20),
     position varchar(100),
@@ -20,7 +20,7 @@ create table admin_staff (
 );
 
 create table meeting_room (
-	room_id double primary key auto_increment,
+	room_id bigint primary key auto_increment,
     room_code varchar(100),
     room_name varchar(100),
     location varchar(100),
@@ -30,12 +30,12 @@ create table meeting_room (
 );
 
 create table reservation (
-	reservation_id double primary key auto_increment,
+	reservation_id bigint primary key auto_increment,
     reservation_no varchar(50) not null,
     meeting_topic varchar(300) not null,
-    apply_dept_id double not null,
-    applicant_staff_id double not null,
-    reservation_room_id double not null,
+    apply_dept_id bigint not null,
+    applicant_staff_id bigint not null,
+    reservation_room_id bigint not null,
     start_time datetime not null,
     end_time datetime not null,
     participant_count int not null,
@@ -48,9 +48,9 @@ create table reservation (
 );
 
 create table confirmation_log (
-	confirm_id double primary key auto_increment,
-    reservation_id double not null,
-    confirmer_staff_id double not null,
+	confirm_id bigint primary key auto_increment,
+    reservation_id bigint not null,
+    confirmer_staff_id bigint not null,
     confirm_process varchar(50) not null,
     confirm_comment varchar(500),
     confirm_time datetime default current_timestamp,
@@ -59,9 +59,9 @@ create table confirmation_log (
 );
 
 create table participant (
-	participant_id double primary key auto_increment,
-    reservation_id double not null,
-    participant_staff_id double not null,
+	participant_id bigint primary key auto_increment,
+    reservation_id bigint not null,
+    participant_staff_id bigint not null,
     sign_in_process varchar(50) default '未签到',
     sign_in_time datetime null,
     foreign key (reservation_id) references reservation (reservation_id),
