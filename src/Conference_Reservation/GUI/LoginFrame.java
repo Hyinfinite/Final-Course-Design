@@ -9,7 +9,7 @@ import java.awt.*;
 public class LoginFrame extends JFrame {
     private JTextField tfNo = new JTextField(15);
     private JPasswordField tfPwd = new JPasswordField(15);
-    private JComboBox<String> cbRole = new JComboBox<String>(new String[]{"SYS_ADMIN","ROOM_ADMIN","STAFF"});
+    private JComboBox<String> cbRole = new JComboBox<String>(new String[]{"SYS_Admin","ROOM_Admin","Staff"});
 
     public LoginFrame() {
         setTitle("会议预约系统 - 登录");
@@ -46,8 +46,8 @@ public class LoginFrame extends JFrame {
             return;
         }
         dispose();
-        if ("SYS_ADMIN".equals(u.getAccessLevel())) new AdminFrame(u);
-        else if ("ROOM_ADMIN".equals(u.getAccessLevel())) new ManagerFrame(u);
+        if ("SYS_Admin".equals(u.getAccessLevel())) new AdminFrame(u);
+        else if ("ROOM_Admin".equals(u.getAccessLevel())) new ManagerFrame(u);
         else new StaffFrame(u);
     }
 }

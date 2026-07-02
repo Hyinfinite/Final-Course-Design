@@ -3,7 +3,7 @@ package Conference_Reservation.Util;
 import java.sql.*;
 
 public class SqlUtil {
-    private static final String url = "jdbc:mysql://localhost:3306/Conference_reservation";
+    private static final String url = "jdbc:mysql://localhost:3306/conference_system";
     private static final String user = "root";
     private static final String password = "@lolcxayjm!1";
 
