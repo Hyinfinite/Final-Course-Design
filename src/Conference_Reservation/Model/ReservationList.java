@@ -1,27 +1,27 @@
 package Conference_Reservation.Model;
 
 public class ReservationList {
-    private double reservationID;
-    private double reservationNO;
+    private long reservationID;
+    private long reservationNO;
     private String roomName;
     private String meetingTopic;
-    private double applicantID;
+    private long applicantID;
     private String startTime;
     private String endTime;
     private String process;
     private String applicantName;
 
-    public double getReservationID() {
+    public long getReservationID() {
         return reservationID;
     }
-    public void setReservationID(double reservationID) {
+    public void setReservationID(long reservationID) {
         this.reservationID = reservationID;
     }
 
-    public double getReservationNO() {
+    public long getReservationNO() {
         return reservationNO;
     }
-    public void setReservationNO(double reservationNO) {
+    public void setReservationNO(long reservationNO) {
         this.reservationNO = reservationNO;
     }
 
@@ -39,10 +39,10 @@ public class ReservationList {
         this.meetingTopic = meetingTopic;
     }
 
-    public double getApplicantID() {
+    public long getApplicantID() {
         return applicantID;
     }
-    public void setApplicantID(double applicantID) {
+    public void setApplicantID(long applicantID) {
         this.applicantID = applicantID;
     }
 
