@@ -180,6 +180,7 @@ public class ReservationDAO {
             con.setAutoCommit(false);
 
             stm1 = con.prepareStatement(updateSql);
+            stm1.setString(1, process);
             stm1.setLong(2, reservation_id);
             int n = stm1.executeUpdate();
             if (n <= 0) {
@@ -189,7 +190,7 @@ public class ReservationDAO {
 
             stm2 = con.prepareStatement(confirmSql);
             stm2.setLong(1, reservation_id);
-            stm2.setDouble(2, manager_id);
+            stm2.setLong(2, manager_id);
             stm2.setString(3, process);
             stm2.setString(4, comment);
             stm2.executeUpdate();
@@ -199,11 +200,12 @@ public class ReservationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            SqlUtil.closeAll(con, stm2, null);
             SqlUtil.closeAll(con, stm1, null);
-            SqlUtil.closeAll(null, stm2, null);
         }
         return false;
     }
+
 
     public int[] processCount() {
         int[] c = new int[3];
