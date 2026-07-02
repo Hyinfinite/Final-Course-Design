@@ -15,6 +15,10 @@ public class UserDAO {
         try {
             con = SqlUtil.getConnection();
             stm = con.prepareStatement(sql);
+            stm.setString(1, staffNo);
+            stm.setString(2, password);
+            stm.setString(3, accessLevel);
+
             rs = stm.executeQuery();
             if (rs.next()) {
                 User u = new User();
