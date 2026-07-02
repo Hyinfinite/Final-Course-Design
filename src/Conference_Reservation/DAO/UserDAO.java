@@ -7,7 +7,8 @@ import java.sql.*;
 
 public class UserDAO {
     public User Login(String staffNo, String password, String accessLevel) {
-        String sql = "SELECT staff_id, staff_no, staff_name, dept_id, access_level FROM admin_staff WHERE staffNo = ? AND password = ? AND accessLevel = ?";
+        String sql = "SELECT staff_id, staff_no, staff_name, dept_id, access_level FROM admin_staff " +
+                     "WHERE staff_no = ? AND staff_password = ? AND access_Level = ?";
         Connection con = null;
         PreparedStatement stm = null;
         ResultSet rs = null;
