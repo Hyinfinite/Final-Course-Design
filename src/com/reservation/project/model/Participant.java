@@ -1,29 +1,29 @@
 package com.reservation.project.model;
 
 public class Participant {
-    private long participantID;
-    private long reservationID;
+    private long participantId;
+    private long reservationId;
     private String reservationNo;
     private String meetingTopic;
     private String startTime;
     private String endTime;
-    private long participantStaffID;
+    private long participantStaffId;
     private String participantName;
     private String signInProcess;
     private String signInTime;
 
-    public long getParticipantID() {
-        return participantID;
+    public long getParticipantId() {
+        return participantId;
     }
-    public void setParticipantID(long participantID) {
-        this.participantID = participantID;
+    public void setParticipantId(long participantId) {
+        this.participantId = participantId;
     }
 
-    public long getReservationID() {
-        return reservationID;
+    public long getReservationId() {
+        return reservationId;
     }
-    public void setReservationID(long reservationID) {
-        this.reservationID = reservationID;
+    public void setReservationId(long reservationId) {
+        this.reservationId = reservationId;
     }
 
     public String getReservationNo() {
@@ -54,11 +54,11 @@ public class Participant {
         this.endTime = endTime;
     }
 
-    public long getParticipantStaffID() {
-        return participantStaffID;
+    public long getParticipantStaffId() {
+        return participantStaffId;
     }
-    public void setParticipantStaffID(long participantStaffID) {
-        this.participantStaffID = participantStaffID;
+    public void setParticipantStaffId(long participantStaffId) {
+        this.participantStaffId = participantStaffId;
     }
 
     public String getParticipantName() {

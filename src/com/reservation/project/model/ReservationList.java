@@ -1,21 +1,21 @@
 package com.reservation.project.model;
 
 public class ReservationList {
-    private long reservationID;
+    private long reservationId;
     private String reservationNO;
     private String roomName;
     private String meetingTopic;
-    private long applicantID;
+    private long applicantId;
     private String startTime;
     private String endTime;
     private String process;
     private String applicantName;
 
-    public long getReservationID() {
-        return reservationID;
+    public long getReservationId() {
+        return reservationId;
     }
-    public void setReservationID(long reservationID) {
-        this.reservationID = reservationID;
+    public void setReservationId(long reservationId) {
+        this.reservationId = reservationId;
     }
 
     public String getReservationNO() {
@@ -39,11 +39,11 @@ public class ReservationList {
         this.meetingTopic = meetingTopic;
     }
 
-    public long getApplicantID() {
-        return applicantID;
+    public long getApplicantId() {
+        return applicantId;
     }
-    public void setApplicantID(long applicantID) {
-        this.applicantID = applicantID;
+    public void setApplicantId(long applicantId) {
+        this.applicantId = applicantId;
     }
 
     public String getStartTime() {

@@ -34,7 +34,7 @@ public class ManagerDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 ReservationList r = new ReservationList();
-                r.setReservationID(rs.getLong("reservation_id"));
+                r.setReservationId(rs.getLong("reservation_id"));
                 r.setReservationNO(rs.getString("reservation_no"));
                 r.setMeetingTopic(rs.getString("meeting_topic"));
                 r.setRoomName(rs.getString("room_name"));

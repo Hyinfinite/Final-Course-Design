@@ -1,17 +1,17 @@
 package com.reservation.project.model;
 
 public class RoomUsageStat {
-    private long roomID;
+    private long roomId;
     private String roomName;
     private double usedMinutes;
     private double usageRate;
 
-    public long getRoomID() {
-        return roomID;
+    public long getRoomId() {
+        return roomId;
     }
 
-    public void setRoomID(long roomID) {
-        this.roomID = roomID;
+    public void setRoomId(long roomId) {
+        this.roomId = roomId;
     }
 
     public String getRoomName() {

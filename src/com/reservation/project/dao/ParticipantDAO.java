@@ -19,7 +19,9 @@ public class ParticipantDAO {
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             con.setAutoCommit(false);
 
             ps = con.prepareStatement(sql);
@@ -33,10 +35,8 @@ public class ParticipantDAO {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            try { if (con != null) con.rollback(); } catch (Exception ignored) {}
             return false;
         } finally {
-            try { if (con != null) con.setAutoCommit(true); } catch (Exception ignored) {}
             SqlUtil.closeAll(con, ps, null);
         }
     }
@@ -56,19 +56,21 @@ public class ParticipantDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sql);
             ps.setLong(1, deptId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 Participant x = new Participant();
-                x.setParticipantID(rs.getLong("participant_id"));
-                x.setReservationID(rs.getLong("reservation_id"));
+                x.setParticipantId(rs.getLong("participant_id"));
+                x.setReservationId(rs.getLong("reservation_id"));
                 x.setReservationNo(rs.getString("reservation_no"));
                 x.setMeetingTopic(rs.getString("meeting_topic"));
                 x.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
                 x.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
-                x.setParticipantStaffID(rs.getLong("participant_staff_id"));
+                x.setParticipantStaffId(rs.getLong("participant_staff_id"));
                 x.setParticipantName(rs.getString("staff_name"));
                 x.setSignInProcess(rs.getString("sign_in_process"));
                 x.setSignInTime(rs.getTimestamp("sign_in_time") == null ? "" : String.valueOf(rs.getTimestamp("sign_in_time")));
@@ -89,7 +91,9 @@ public class ParticipantDAO {
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setLong(1, participantId);
             return ps.executeUpdate() > 0;

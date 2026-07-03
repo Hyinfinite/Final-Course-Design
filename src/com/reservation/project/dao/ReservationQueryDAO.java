@@ -47,7 +47,9 @@ public class ReservationQueryDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sb.toString());
 
             for (int i = 0; i < params.size(); i++) {
@@ -57,7 +59,7 @@ public class ReservationQueryDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 ReservationList r = new ReservationList();
-                r.setReservationID(rs.getLong("reservation_id"));
+                r.setReservationId(rs.getLong("reservation_id"));
                 r.setReservationNO(rs.getString("reservation_no"));
                 r.setMeetingTopic(rs.getString("meeting_topic"));
                 r.setRoomName(rs.getString("room_name"));

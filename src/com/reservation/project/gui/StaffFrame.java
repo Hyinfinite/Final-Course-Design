@@ -131,7 +131,7 @@ public class StaffFrame extends JFrame {
             int row = table.getSelectedRow();
             if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一条记录"); return; }
             long reservationId = Long.parseLong(myModel.getValueAt(row, 0).toString());
-            boolean ok = new ReservationDAO().cancelReservation(reservationId, user.getStaffID());
+            boolean ok = new ReservationDAO().cancelReservation(reservationId, user.getStaffId());
             JOptionPane.showMessageDialog(this, ok ? "撤销成功" : "撤销失败（仅待确认可撤销）");
             loadMyReservations();
         });
@@ -258,7 +258,7 @@ public class StaffFrame extends JFrame {
             }
 
             boolean ok = dao.addReservation(
-                    topic, user.getDeptID(), user.getStaffID(), roomId,
+                    topic, user.getDeptId(), user.getStaffId(), roomId,
                     start, end, count, tfDesc.getText() == null ? "" : tfDesc.getText().trim()
             );
             JOptionPane.showMessageDialog(this, ok ? "提交成功（待确认）" : "提交失败");
@@ -271,10 +271,10 @@ public class StaffFrame extends JFrame {
 
     private void loadMyReservations() {
         myModel.setRowCount(0);
-        List<ReservationList> list = new ReservationDAO().searchMyReservation(user.getStaffID());
+        List<ReservationList> list = new ReservationDAO().searchMyReservation(user.getStaffId());
         for (ReservationList r : list) {
             myModel.addRow(new Object[]{
-                    r.getReservationID(), r.getReservationNO(), r.getMeetingTopic(),
+                    r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(),
                     r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getProcess()
             });
         }
@@ -282,10 +282,10 @@ public class StaffFrame extends JFrame {
 
     private void loadSignRecords() {
         signModel.setRowCount(0);
-        List<Participant> list = new ParticipantDAO().listSignRecordsByDept(user.getDeptID());
+        List<Participant> list = new ParticipantDAO().listSignRecordsByDept(user.getDeptId());
         for (Participant x : list) {
             signModel.addRow(new Object[]{
-                    x.getParticipantID(),
+                    x.getParticipantId(),
                     x.getReservationNo(),
                     x.getMeetingTopic(),
                     x.getStartTime(),

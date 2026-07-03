@@ -1,7 +1,7 @@
 package com.reservation.project.model;
 
 public class MeetingRoom {
-    private long roomID;
+    private long roomId;
     private String roomCode;
     private String roomName;
     private String Location;
@@ -9,12 +9,12 @@ public class MeetingRoom {
     private int hasProjector;
     private int hasAudio;
 
-    public long getRoomID() {
-        return roomID;
+    public long getRoomId() {
+        return roomId;
     }
 
-    public void setRoomID(long roomID) {
-        this.roomID = roomID;
+    public void setRoomId(long roomId) {
+        this.roomId = roomId;
     }
 
     public String getRoomCode() {

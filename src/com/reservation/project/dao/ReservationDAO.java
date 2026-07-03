@@ -15,22 +15,26 @@ public class ReservationDAO {
                 "AND reservation_process IN ('待确认','已确认') " +
                 "AND (? < end_time AND ? > start_time)";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return true;
+            if (con == null) {
+                return true;
+            }
 
-            stm = con.prepareStatement(sql);
-            stm.setLong(1, room_id);
-            stm.setTimestamp(2, start_time);
-            stm.setTimestamp(3, end_time);
-            rs = stm.executeQuery();
-            if (rs.next()) return rs.getInt(1) > 0;
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, room_id);
+            ps.setTimestamp(2, start_time);
+            ps.setTimestamp(3, end_time);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm, rs);
+            SqlUtil.closeAll(con, ps, rs);
         }
         return true;
     }
@@ -40,27 +44,29 @@ public class ReservationDAO {
                 "(reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, reservation_room_id, start_time, end_time, participant_count, meeting_desc, reservation_process) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '待确认')";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
 
-            stm = con.prepareStatement(sql);
-            stm.setString(1, ReservationNOUtil.ReservationNO());
-            stm.setString(2, topic);
-            stm.setLong(3, dept_id);
-            stm.setLong(4, applicant_id);
-            stm.setLong(5, room_id);
-            stm.setTimestamp(6, start_time);
-            stm.setTimestamp(7, end_time);
-            stm.setInt(8, count);
-            stm.setString(9, desc);
-            return stm.executeUpdate() > 0;
+            ps = con.prepareStatement(sql);
+            ps.setString(1, ReservationNOUtil.ReservationNO());
+            ps.setString(2, topic);
+            ps.setLong(3, dept_id);
+            ps.setLong(4, applicant_id);
+            ps.setLong(5, room_id);
+            ps.setTimestamp(6, start_time);
+            ps.setTimestamp(7, end_time);
+            ps.setInt(8, count);
+            ps.setString(9, desc);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
-            SqlUtil.closeAll(con, stm, null);
+            SqlUtil.closeAll(con, ps, null);
         }
     }
 
@@ -77,19 +83,21 @@ public class ReservationDAO {
                 "ORDER BY r.created_at DESC";
 
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
 
-            stm = con.prepareStatement(sql);
-            stm.setDouble(1, applicant_id);
-            rs = stm.executeQuery();
+            ps = con.prepareStatement(sql);
+            ps.setDouble(1, applicant_id);
+            rs = ps.executeQuery();
 
             while (rs.next()) {
                 ReservationList ri = new ReservationList();
-                ri.setReservationID((long) rs.getDouble("reservation_id"));
+                ri.setReservationId((long) rs.getDouble("reservation_id"));
                 ri.setReservationNO(rs.getString("reservation_no"));
                 ri.setMeetingTopic(rs.getString("meeting_topic"));
                 ri.setRoomName(rs.getString("room_name"));
@@ -102,7 +110,7 @@ public class ReservationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm, rs);
+            SqlUtil.closeAll(con, ps, rs);
         }
         return list;
     }
@@ -111,20 +119,22 @@ public class ReservationDAO {
         String sql = "UPDATE reservation SET reservation_process = '已取消' " +
                 "WHERE reservation_id = ? AND applicant_staff_id = ? AND reservation_process = '待确认'";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
 
-            stm = con.prepareStatement(sql);
-            stm.setLong(1, reservation_id);
-            stm.setLong(2, applicant_id);
-            return stm.executeUpdate() > 0;
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, reservation_id);
+            ps.setLong(2, applicant_id);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
-            SqlUtil.closeAll(con, stm, null);
+            SqlUtil.closeAll(con, ps, null);
         }
     }
 
@@ -137,17 +147,19 @@ public class ReservationDAO {
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
                 "WHERE r.reservation_process = '待确认' ORDER BY r.created_at DESC";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
 
-            stm = con.prepareStatement(sql);
-            rs = stm.executeQuery();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
             while (rs.next()) {
                 ReservationList ri = new ReservationList();
-                ri.setReservationID((long) rs.getDouble("reservation_id"));
+                ri.setReservationId((long) rs.getDouble("reservation_id"));
                 ri.setReservationNO(rs.getString("reservation_no"));
                 ri.setMeetingTopic(rs.getString("meeting_topic"));
                 ri.setRoomName(rs.getString("room_name"));
@@ -160,7 +172,7 @@ public class ReservationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm, rs);
+            SqlUtil.closeAll(con, ps, rs);
         }
         return list;
     }
@@ -171,37 +183,39 @@ public class ReservationDAO {
         String confirmSql = "INSERT INTO confirmation_log (reservation_id, confirmer_staff_id, confirm_process, confirm_comment) " +
                 "VALUES (?, ?, ?, ?)";
         Connection con = null;
-        PreparedStatement stm1 = null;
-        PreparedStatement stm2 = null;
+        PreparedStatement ps1 = null;
+        PreparedStatement ps2 = null;
 
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             con.setAutoCommit(false);
 
-            stm1 = con.prepareStatement(updateSql);
-            stm1.setString(1, process);
-            stm1.setLong(2, reservation_id);
-            int n = stm1.executeUpdate();
+            ps1 = con.prepareStatement(updateSql);
+            ps1.setString(1, process);
+            ps1.setLong(2, reservation_id);
+            int n = ps1.executeUpdate();
             if (n <= 0) {
                 con.rollback();
                 return false;
             }
 
-            stm2 = con.prepareStatement(confirmSql);
-            stm2.setLong(1, reservation_id);
-            stm2.setLong(2, manager_id);
-            stm2.setString(3, process);
-            stm2.setString(4, comment);
-            stm2.executeUpdate();
+            ps2 = con.prepareStatement(confirmSql);
+            ps2.setLong(1, reservation_id);
+            ps2.setLong(2, manager_id);
+            ps2.setString(3, process);
+            ps2.setString(4, comment);
+            ps2.executeUpdate();
 
             con.commit();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm2, null);
-            SqlUtil.closeAll(con, stm1, null);
+            SqlUtil.closeAll(con, ps2, null);
+            SqlUtil.closeAll(con, ps1, null);
         }
         return false;
     }
@@ -214,14 +228,16 @@ public class ReservationDAO {
                 "SUM(CASE WHEN reservation_process = '已确认' THEN 1 ELSE 0 END) AS confirmed " +
                 "FROM reservation";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return c;
+            if (con == null) {
+                return c;
+            }
 
-            stm = con.prepareStatement(sql);
-            rs = stm.executeQuery();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
             if (rs.next()) {
                 c[0] = rs.getInt("total");
                 c[1] = rs.getInt("pending");
@@ -230,7 +246,7 @@ public class ReservationDAO {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm, rs);
+            SqlUtil.closeAll(con, ps, rs);
         }
         return c;
     }

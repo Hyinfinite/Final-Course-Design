@@ -64,8 +64,4 @@ public class LoginFrame extends JFrame {
             new StaffFrame(u);
         }
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(LoginFrame::new);
-    }
 }

@@ -22,10 +22,10 @@ public class UserDAO {
             rs = stm.executeQuery();
             if (rs.next()) {
                 User u = new User();
-                u.setStaffID(rs.getLong("staff_id"));
+                u.setStaffId(rs.getLong("staff_id"));
                 u.setStaffNO(rs.getString("staff_no"));
                 u.setStaffName(rs.getString("staff_name"));
-                u.setDeptID(rs.getLong("dept_id"));
+                u.setDeptId(rs.getLong("dept_id"));
                 u.setAccessLevel(rs.getString("access_level"));
                 return u;
             }

@@ -18,15 +18,17 @@ public class StaffDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
             while (rs.next()) {
                 StaffInfo s = new StaffInfo();
-                s.setStaffID(rs.getLong("staff_id"));
+                s.setStaffId(rs.getLong("staff_id"));
                 s.setStaffNo(rs.getString("staff_no"));
                 s.setStaffName(rs.getString("staff_name"));
-                s.setDeptID(rs.getLong("dept_id"));
+                s.setDeptId(rs.getLong("dept_id"));
                 s.setDeptName(rs.getString("dept_name"));
                 s.setGender(rs.getString("gender"));
                 s.setPosition(rs.getString("position"));
@@ -42,19 +44,21 @@ public class StaffDAO {
         return list;
     }
 
-    public boolean addStaff(String staffNo, String staffName, long deptID, String gender,
+    public boolean addStaff(String staffNo, String staffName, long deptId, String gender,
                             String position, String phone, String accessLevel) {
         String sql = "INSERT INTO admin_staff(staff_no, staff_name, dept_id, staff_password, gender, position, phone, access_level) " +
-                "VALUES(?,?,?,?,?,?,?,?)";
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, staffNo);
             ps.setString(2, staffName);
-            ps.setLong(3, deptID);
+            ps.setLong(3, deptId);
             ps.setString(4, "123456"); // 默认密码
             ps.setString(5, gender);
             ps.setString(6, position);
@@ -71,7 +75,7 @@ public class StaffDAO {
         }
     }
 
-    public boolean updateStaffBasic(long staffID, String staffName, long deptID, String gender,
+    public boolean updateStaffBasic(long staffId, String staffName, long deptId, String gender,
                                     String position, String phone) {
         String sql = "UPDATE admin_staff SET staff_name = ?, dept_id = ?, gender = ?, position = ?, phone = ? " +
                 "WHERE staff_id = ?";
@@ -79,14 +83,16 @@ public class StaffDAO {
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, staffName);
-            ps.setLong(2, deptID);
+            ps.setLong(2, deptId);
             ps.setString(3, gender);
             ps.setString(4, position);
             ps.setString(5, phone);
-            ps.setLong(6, staffID);
+            ps.setLong(6, staffId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,16 +102,18 @@ public class StaffDAO {
         }
     }
 
-    public boolean resetPassword(long staffID, String newPwd) {
+    public boolean resetPassword(long staffId, String newPwd) {
         String sql = "UPDATE admin_staff SET staff_password = ? WHERE staff_id = ?";
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, newPwd);
-            ps.setLong(2, staffID);
+            ps.setLong(2, staffId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,7 +130,9 @@ public class StaffDAO {
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setLong(1, staffId);
             return ps.executeUpdate() > 0;
@@ -134,20 +144,22 @@ public class StaffDAO {
         }
     }
 
-    public boolean updateOwnProfile(long staffID, String staffName, String gender, String position, String phone) {
+    public boolean updateOwnProfile(long staffId, String staffName, String gender, String position, String phone) {
         String sql = "UPDATE admin_staff SET staff_name = ?, gender = ?, position = ?, phone = ? " +
                 "WHERE staff_id = ?";
         Connection con = null;
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, staffName);
             ps.setString(2, gender);
             ps.setString(3, position);
             ps.setString(4, phone);
-            ps.setLong(5, staffID);
+            ps.setLong(5, staffId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +175,9 @@ public class StaffDAO {
         PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
+            if (con == null) {
+                return false;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, newPwd);
             ps.setLong(2, staffId);
@@ -177,7 +191,7 @@ public class StaffDAO {
         }
     }
 
-    public StaffInfo findByID(long staffID) {
+    public StaffInfo findByID(long staffId) {
         String sql = "SELECT a.staff_id, a.staff_no, a.staff_name, a.dept_id, d.dept_name, a.gender, a.position, a.phone, a.access_level " +
                 "FROM admin_staff a LEFT JOIN department d ON a.dept_id = d.dept_id WHERE a.staff_id = ?";
         Connection con = null;
@@ -185,16 +199,18 @@ public class StaffDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return null;
+            if (con == null) {
+                return null;
+            }
             ps = con.prepareStatement(sql);
-            ps.setLong(1, staffID);
+            ps.setLong(1, staffId);
             rs = ps.executeQuery();
             if (rs.next()) {
                 StaffInfo s = new StaffInfo();
-                s.setStaffID(rs.getLong("staff_id"));
+                s.setStaffId(rs.getLong("staff_id"));
                 s.setStaffNo(rs.getString("staff_no"));
                 s.setStaffName(rs.getString("staff_name"));
-                s.setDeptID(rs.getLong("dept_id"));
+                s.setDeptId(rs.getLong("dept_id"));
                 s.setDeptName(rs.getString("dept_name"));
                 s.setGender(rs.getString("gender"));
                 s.setPosition(rs.getString("position"));

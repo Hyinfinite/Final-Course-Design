@@ -18,7 +18,7 @@ public class ReportDAO {
                 "COALESCE(SUM(TIMESTAMPDIFF(MINUTE, r.start_time, r.end_time)),0) AS used_minutes " +
                 "FROM meeting_room m " +
                 "LEFT JOIN reservation r ON m.room_id = r.reservation_room_id " +
-                "AND r.reservation_process='已确认' " +
+                "AND r.reservation_process = '已确认' " +
                 "AND DATE_FORMAT(r.start_time, '%Y-%m') = ? " +
                 "GROUP BY m.room_id, m.room_name " +
                 "ORDER BY m.room_id";
@@ -27,13 +27,15 @@ public class ReportDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, month);
             rs = ps.executeQuery();
             while (rs.next()) {
                 RoomUsageStat x = new RoomUsageStat();
-                x.setRoomID(rs.getLong("room_id"));
+                x.setRoomId(rs.getLong("room_id"));
                 x.setRoomName(rs.getString("room_name"));
                 double used = rs.getDouble("used_minutes");
                 x.setUsedMinutes(used);
@@ -62,13 +64,15 @@ public class ReportDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, month);
             rs = ps.executeQuery();
             while (rs.next()) {
                 DeptMeetingStat x = new DeptMeetingStat();
-                x.setDeptID(rs.getLong("dept_id"));
+                x.setDeptId(rs.getLong("dept_id"));
                 x.setDeptName(rs.getString("dept_name"));
                 x.setMeetingCount(rs.getInt("meeting_count"));
                 list.add(x);

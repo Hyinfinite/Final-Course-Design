@@ -32,7 +32,9 @@ public class RoomAvailabilityDAO {
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return list;
+            if (con == null) {
+                return list;
+            }
             ps = con.prepareStatement(sql);
             ps.setString(1, dateStr);
             rs = ps.executeQuery();

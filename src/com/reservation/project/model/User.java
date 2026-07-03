@@ -1,17 +1,17 @@
 package com.reservation.project.model;
 
 public class User {
-    private long staffID;
+    private long staffId;
     private String staffNO;
     private String staffName;
-    private long deptID;
+    private long deptId;
     private String accessLevel;
 
-    public long getStaffID() {
-        return staffID;
+    public long getStaffId() {
+        return staffId;
     }
-    public void setStaffID(long staffID) {
-        this.staffID = staffID;
+    public void setStaffId(long staffId) {
+        this.staffId = staffId;
     }
 
     public String getStaffNO() {
@@ -28,11 +28,11 @@ public class User {
         this.staffName = staffName;
     }
 
-    public long getDeptID() {
-        return deptID;
+    public long getDeptId() {
+        return deptId;
     }
-    public void setDeptID(long deptID) {
-        this.deptID = deptID;
+    public void setDeptId(long deptId) {
+        this.deptId = deptId;
     }
 
     public String getAccessLevel() {

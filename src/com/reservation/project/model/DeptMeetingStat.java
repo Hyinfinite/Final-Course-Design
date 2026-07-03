@@ -1,16 +1,16 @@
 package com.reservation.project.model;
 
 public class DeptMeetingStat {
-    private long deptID;
+    private long deptId;
     private String deptName;
     private int meetingCount;
 
-    public long getDeptID() {
-        return deptID;
+    public long getDeptId() {
+        return deptId;
     }
 
-    public void setDeptID(long deptID) {
-        this.deptID = deptID;
+    public void setDeptId(long deptId) {
+        this.deptId = deptId;
     }
 
     public String getDeptName() {

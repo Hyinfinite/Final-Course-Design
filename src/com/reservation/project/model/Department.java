@@ -1,14 +1,14 @@
 package com.reservation.project.model;
 
 public class Department {
-    private long deptID;
+    private long deptId;
     private String deptName;
 
-    public long getDeptID() {
-        return deptID;
+    public long getDeptId() {
+        return deptId;
     }
-    public void setDeptID(long deptID) {
-        this.deptID = deptID;
+    public void setDeptId(long deptId) {
+        this.deptId = deptId;
     }
 
     public String getDeptName() {

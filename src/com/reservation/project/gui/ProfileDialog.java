@@ -59,7 +59,7 @@ public class ProfileDialog extends JDialog {
 
         btnSave.addActionListener(e -> {
             boolean ok = dao.updateOwnProfile(
-                    loginUser.getStaffID(),
+                    loginUser.getStaffId(),
                     tfName.getText().trim(),
                     tfGender.getText().trim(),
                     tfPos.getText().trim(),
@@ -103,7 +103,7 @@ public class ProfileDialog extends JDialog {
                 return;
             }
 
-            boolean ok = dao.changePassword(loginUser.getStaffID(), o, n);
+            boolean ok = dao.changePassword(loginUser.getStaffId(), o, n);
             JOptionPane.showMessageDialog(this, ok ? "修改成功" : "修改失败（旧密码错误）");
         });
 
@@ -111,7 +111,7 @@ public class ProfileDialog extends JDialog {
     }
 
     private void loadProfile() {
-        StaffInfo s = dao.findByID(loginUser.getStaffID());
+        StaffInfo s = dao.findByID(loginUser.getStaffId());
         if (s == null) return;
         tfName.setText(s.getStaffName());
         tfGender.setText(s.getGender());

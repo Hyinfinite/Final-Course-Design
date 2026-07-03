@@ -24,7 +24,7 @@ public class DepartmentDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 Department d = new Department();
-                d.setDeptID(rs.getLong("dept_id"));
+                d.setDeptId(rs.getLong("dept_id"));
                 d.setDeptName(rs.getString("dept_name"));
                 list.add(d);
             }

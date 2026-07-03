@@ -25,7 +25,7 @@ public class MeetingRoomManageDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 MeetingRoom m = new MeetingRoom();
-                m.setRoomID(rs.getLong("room_id"));
+                m.setRoomId(rs.getLong("room_id"));
                 m.setRoomCode(rs.getString("room_code"));
                 m.setRoomName(rs.getString("room_name"));
                 m.setLocation(rs.getString("location"));

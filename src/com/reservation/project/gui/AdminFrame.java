@@ -1,7 +1,5 @@
 package com.reservation.project.gui;
 
-import Conference_Reservation.DAO.*;
-import Conference_Reservation.Model.*;
 import com.reservation.project.dao.*;
 import com.reservation.project.model.*;
 
@@ -64,7 +62,7 @@ public class AdminFrame extends JFrame {
         Runnable load = () -> {
             model.setRowCount(0);
             List<Department> list = dao.listAll();
-            for (Department d : list) model.addRow(new Object[]{d.getDeptID(), d.getDeptName()});
+            for (Department d : list) model.addRow(new Object[]{d.getDeptId(), d.getDeptName()});
         };
 
         btnAdd.addActionListener(e -> {
@@ -144,7 +142,7 @@ public class AdminFrame extends JFrame {
             model.setRowCount(0);
             for (MeetingRoom m : dao.listAll()) {
                 model.addRow(new Object[]{
-                        m.getRoomID(), m.getRoomCode(), m.getRoomName(), m.getLocation(),
+                        m.getRoomId(), m.getRoomCode(), m.getRoomName(), m.getLocation(),
                         m.getCapacity(), m.getHasProjector() == 1 ? "有" : "无", m.getHasAudio() == 1 ? "有" : "无"
                 });
             }
@@ -257,7 +255,7 @@ public class AdminFrame extends JFrame {
             model.setRowCount(0);
             for (StaffInfo s : dao.listAll()) {
                 model.addRow(new Object[]{
-                        s.getStaffID(), s.getStaffNo(), s.getStaffName(), s.getDeptID(), s.getDeptName(),
+                        s.getStaffId(), s.getStaffNo(), s.getStaffName(), s.getDeptId(), s.getDeptName(),
                         s.getGender(), s.getPosition(), s.getPhone(), s.getAccessLevel()
                 });
             }
@@ -372,7 +370,7 @@ public class AdminFrame extends JFrame {
             List<ReservationList> list = dao.queryAll("", 0, 0);
             for (ReservationList r : list) {
                 model.addRow(new Object[]{
-                        r.getReservationID(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
+                        r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                         r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName()
                 });
             }
@@ -393,7 +391,7 @@ public class AdminFrame extends JFrame {
             List<ReservationList> list = dao.queryAll(date, deptId, roomId);
             for (ReservationList r : list) {
                 model.addRow(new Object[]{
-                        r.getReservationID(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
+                        r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                         r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName()
                 });
             }
@@ -451,12 +449,12 @@ public class AdminFrame extends JFrame {
 
             List<RoomUsageStat> roomStats = dao.roomUsageByMonth(month);
             for (RoomUsageStat s : roomStats) {
-                roomModel.addRow(new Object[]{s.getRoomID(), s.getRoomName(), s.getUsedMinutes(), s.getUsageRate()});
+                roomModel.addRow(new Object[]{s.getRoomId(), s.getRoomName(), s.getUsedMinutes(), s.getUsageRate()});
             }
 
             List<DeptMeetingStat> deptStats = dao.deptMeetingCountByMonth(month);
             for (DeptMeetingStat s : deptStats) {
-                deptModel.addRow(new Object[]{s.getDeptID(), s.getDeptName(), s.getMeetingCount()});
+                deptModel.addRow(new Object[]{s.getDeptId(), s.getDeptName(), s.getMeetingCount()});
             }
         });
 
@@ -504,7 +502,7 @@ public class AdminFrame extends JFrame {
                 return;
             }
 
-            boolean ok = dao.changePassword(loginUser.getStaffID(), o, n);
+            boolean ok = dao.changePassword(loginUser.getStaffId(), o, n);
             JOptionPane.showMessageDialog(this, ok ? "修改成功，请重新登录生效" : "修改失败（旧密码错误）");
         });
 

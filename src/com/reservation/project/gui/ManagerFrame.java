@@ -105,7 +105,7 @@ public class ManagerFrame extends JFrame {
         }
         long reservationId = Long.parseLong(pendingModel.getValueAt(row, 0).toString());
 
-        boolean ok = new ReservationDAO().processReservation(reservationId, user.getStaffID(), process, comment);
+        boolean ok = new ReservationDAO().processReservation(reservationId, user.getStaffId(), process, comment);
         JOptionPane.showMessageDialog(this, ok ? "处理成功" : "处理失败");
         if (ok) {
             loadPending();
@@ -118,7 +118,7 @@ public class ManagerFrame extends JFrame {
         List<ReservationList> list = new ReservationDAO().searchPendingReservation();
         for (ReservationList r : list) {
             pendingModel.addRow(new Object[]{
-                    r.getReservationID(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
+                    r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                     r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName()
             });
         }
@@ -129,7 +129,7 @@ public class ManagerFrame extends JFrame {
         List<ReservationList> list = new ManagerDAO().searchProcessedReservation();
         for (ReservationList r : list) {
             historyModel.addRow(new Object[]{
-                    r.getReservationID(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
+                    r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                     r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName()
             });
         }
