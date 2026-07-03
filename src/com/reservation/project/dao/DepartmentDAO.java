@@ -152,4 +152,35 @@ public class DepartmentDAO {
             SqlUtil.closeAll(con, ps, null);
         }
     }
+
+    public List<String> getAllDepartments() {
+        List<String> list = new ArrayList<>();
+        String sql = "SELECT dept_name FROM department";
+        try (Connection conn = SqlUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(rs.getString("dept_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public long getDeptIdByName(String deptName) {
+        String sql = "SELECT dept_id FROM department WHERE dept_name = ?";
+        try (Connection conn = SqlUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, deptName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("dept_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
 }

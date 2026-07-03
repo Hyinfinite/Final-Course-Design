@@ -32,17 +32,26 @@ public class StaffFrame extends JFrame {
 
     private DefaultTableModel myModel = new DefaultTableModel(
             new Object[]{"ID","预约号","主题","会议室","开始","结束","状态"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     private DefaultTableModel freeModel = new DefaultTableModel(
             new Object[]{"会议室ID","会议室","位置","容量","状态"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     private DefaultTableModel signModel = new DefaultTableModel(
             new Object[]{"记录ID","预约号","主题","开始","结束","参会人","签到状态","签到时间"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     public StaffFrame(User user) {
@@ -80,37 +89,45 @@ public class StaffFrame extends JFrame {
     }
 
     private JPanel buildSubmitPanel() {
-        JPanel panel = new JPanel(new BorderLayout(8,8));
+        JPanel panel = new JPanel(new BorderLayout(8, 8));
 
-        JPanel form = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6,8,6,8);
-        c.fill = GridBagConstraints.HORIZONTAL;
-        int r = 0;
+        // 创建表单面板，使用垂直FlowLayout
+        JPanel form = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
 
-        c.gridx=0;c.gridy=r;c.weightx=0; form.add(new JLabel("会议主题"), c);
-        c.gridx=1;c.gridy=r;c.weightx=1; form.add(tfTopic, c);
-        c.gridx=2;c.gridy=r;c.weightx=0; form.add(new JLabel("会议室"), c);
-        c.gridx=3;c.gridy=r;c.weightx=1; form.add(cbRoom, c);
+        // 第一行表单
+        JPanel row1 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        row1.add(new JLabel("会议主题"));
+        row1.add(tfTopic);
+        row1.add(new JLabel("会议室"));
+        row1.add(cbRoom);
+        form.add(row1);
 
-        r++;
-        c.gridx=0;c.gridy=r;c.weightx=0; form.add(new JLabel("参会人数"), c);
-        c.gridx=1;c.gridy=r;c.weightx=1; form.add(tfCount, c);
-        c.gridx=2;c.gridy=r;c.weightx=0; form.add(new JLabel("会议说明"), c);
-        c.gridx=3;c.gridy=r;c.weightx=1; form.add(tfDesc, c);
+        // 第二行表单
+        JPanel row2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        row2.add(new JLabel("参会人数"));
+        row2.add(tfCount);
+        row2.add(new JLabel("会议说明"));
+        row2.add(tfDesc);
+        form.add(row2);
 
-        r++;
-        c.gridx=0;c.gridy=r;c.weightx=0; form.add(new JLabel("会议时间"), c);
-        c.gridx=1;c.gridy=r;c.gridwidth=3;c.weightx=1; form.add(timePicker, c);
+        // 第三行表单
+        JPanel row3 = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        row3.add(new JLabel("会议时间"));
+        row3.add(timePicker);
+        form.add(row3);
 
+        // 创建操作按钮面板
         JButton btnSubmit = new JButton("提交预约");
         JButton btnReloadRoom = new JButton("刷新会议室");
         JPanel op = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        op.add(btnReloadRoom); op.add(btnSubmit);
+        op.add(btnReloadRoom);
+        op.add(btnSubmit);
 
+        // 添加按钮事件监听器
         btnReloadRoom.addActionListener(e -> loadRoomOptions());
         btnSubmit.addActionListener(e -> addReservation());
 
+        // 将组件添加到主面板
         panel.add(form, BorderLayout.CENTER);
         panel.add(op, BorderLayout.SOUTH);
         return panel;
@@ -171,26 +188,97 @@ public class StaffFrame extends JFrame {
         JTable table = new JTable(signModel);
         table.setRowHeight(28);
 
-        JButton btnRefresh = new JButton("刷新签到列表");
+        // 创建查询条件面板
+        JPanel queryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+
+        // 部门选择
+        JComboBox<String> cbDept = new JComboBox<>();
+        cbDept.addItem("全部部门");
+        List<String> depts = new DepartmentDAO().getAllDepartments();
+        for (String dept : depts) {
+            cbDept.addItem(dept);
+        }
+
+        // 时间选择
+        JTextField tfDate = new JTextField(10);
+        tfDate.setText(java.time.LocalDate.now().toString());
+
+        // 查询按钮
+        JButton btnQueryByDept = new JButton("按部门查询");
+        JButton btnQueryByDate = new JButton("按日期查询");
+        JButton btnRefresh = new JButton("刷新列表");
         JButton btnSign = new JButton("签到选中记录");
 
-        JPanel op = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        op.add(btnRefresh); op.add(btnSign);
+        // 添加组件到查询面板
+        queryPanel.add(new JLabel("部门筛选"));
+        queryPanel.add(cbDept);
+        queryPanel.add(btnQueryByDept);
+        queryPanel.add(new JLabel("日期筛选"));
+        queryPanel.add(tfDate);
+        queryPanel.add(btnQueryByDate);
+        queryPanel.add(btnRefresh);
+        queryPanel.add(btnSign);
 
+        // 部门查询事件
+        btnQueryByDept.addActionListener(e -> {
+            signModel.setRowCount(0);
+            String selectedDept = (String) cbDept.getSelectedItem();
+            long deptId = "全部部门".equals(selectedDept) ? -1 : new DepartmentDAO().getDeptIdByName(selectedDept);
+            List<Participant> list = new ParticipantDAO().listSignRecordsByDept(deptId);
+            for (Participant x : list) {
+                signModel.addRow(new Object[]{
+                        x.getParticipantId(),
+                        x.getReservationNo(),
+                        x.getMeetingTopic(),
+                        x.getStartTime(),
+                        x.getEndTime(),
+                        x.getParticipantName(),
+                        x.getSignInProcess(),
+                        x.getSignInTime()
+                });
+            }
+        });
+
+        // 日期查询事件
+        btnQueryByDate.addActionListener(e -> {
+            signModel.setRowCount(0);
+            List<Participant> list = new ParticipantDAO().listSignRecordsByDateAndDept(
+                    tfDate.getText().trim(),
+                    user.getDeptId()
+            );
+            for (Participant x : list) {
+                signModel.addRow(new Object[]{
+                        x.getParticipantId(),
+                        x.getReservationNo(),
+                        x.getMeetingTopic(),
+                        x.getStartTime(),
+                        x.getEndTime(),
+                        x.getParticipantName(),
+                        x.getSignInProcess(),
+                        x.getSignInTime()
+                });
+            }
+        });
+
+        // 刷新和签到按钮事件保持不变
         btnRefresh.addActionListener(e -> loadSignRecords());
         btnSign.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一条记录"); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一条记录");
+                return;
+            }
             long participantId = Long.parseLong(signModel.getValueAt(row, 0).toString());
             boolean ok = new ParticipantDAO().signIn(participantId);
             JOptionPane.showMessageDialog(this, ok ? "签到成功" : "签到失败（可能已签到）");
             loadSignRecords();
         });
 
-        panel.add(op, BorderLayout.NORTH);
+        panel.add(queryPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
     }
+
 
     private void loadRoomOptions() {
         cbRoom.removeAllItems();
@@ -283,6 +371,7 @@ public class StaffFrame extends JFrame {
     private void loadSignRecords() {
         signModel.setRowCount(0);
         List<Participant> list = new ParticipantDAO().listSignRecordsByDept(user.getDeptId());
+        System.out.println("Found " + list.size() + " sign records for department " + user.getDeptId());
         for (Participant x : list) {
             signModel.addRow(new Object[]{
                     x.getParticipantId(),
