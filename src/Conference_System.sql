@@ -64,6 +64,7 @@ create table participant (
     participant_staff_id bigint not null,
     sign_in_process varchar(50) default '未签到',
     sign_in_time datetime null,
+    sign_in_permission varchar(50) default 'SELF',
     foreign key (reservation_id) references reservation (reservation_id),
     foreign key (participant_staff_id) references admin_staff (staff_id)
 );
@@ -73,7 +74,7 @@ insert into department(dept_name) values ('系统管理部门'), ('会议室管�
 
 insert into admin_staff (staff_no, staff_name, dept_id, staff_password, gender, position, phone, access_level) values
 ('A001', '系统管理员', 1, '123456', '男', '系统管理员', '15310009013', 'SYS_Admin'), 
-('M001', '会议室管理员', 2, '123456', '女', '会议室管理员', '19910019011', 'ROOM_Admin'),
+('R001', '会议室管理员', 2, '123456', '女', '会议室管理员', '19910019011', 'ROOM_Admin'),
 ('T001', '张三', 3, '123456', '男', '老师', '13810099001', 'Staff'),
 ('T002', '李四', 3, '123456', '男', '老师', '13810099002', 'Staff'),
 ('T003', '王五', 3, '123456', '男', '老师', '13810099003', 'Staff'),

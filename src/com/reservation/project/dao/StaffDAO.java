@@ -257,4 +257,38 @@ public class StaffDAO {
         }
         return ids;
     }
+
+    // 根据部门ID获取该部门所有员工信息
+    public List<StaffInfo> getStaffByDept(long deptId) {
+        List<StaffInfo> list = new ArrayList<>();
+        String sql = "SELECT staff_id, staff_no, staff_name, dept_id, gender, position, phone, access_level " +
+                "FROM admin_staff WHERE dept_id = ? ORDER BY staff_name";
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = SqlUtil.getConnection();
+            if (con == null) return list;
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, deptId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                StaffInfo s = new StaffInfo();
+                s.setStaffId(rs.getLong("staff_id"));
+                s.setStaffNo(rs.getString("staff_no"));
+                s.setStaffName(rs.getString("staff_name"));
+                s.setDeptId(rs.getLong("dept_id"));
+                s.setGender(rs.getString("gender"));
+                s.setPosition(rs.getString("position"));
+                s.setPhone(rs.getString("phone"));
+                s.setAccessLevel(rs.getString("access_level"));
+                list.add(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            SqlUtil.closeAll(con, ps, rs);
+        }
+        return list;
+    }
 }

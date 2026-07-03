@@ -84,7 +84,7 @@ public class ParticipantDAO {
         return list;
     }
 
-    public boolean signIn(long participantId) {
+    public boolean signIn(long participantId, long operatorId) {
         // 首先检查是否已经签到
         String checkSql = "SELECT sign_in_process FROM participant WHERE participant_id = ?";
         Connection con1 = null;
@@ -132,28 +132,56 @@ public class ParticipantDAO {
             return false;
         } finally {
             SqlUtil.closeAll(con2, ps2, null);
+        }
 
-            // 执行签到
-            String sql = "UPDATE participant SET sign_in_process = '已签到', " +
-                    "sign_in_time = NOW() WHERE participant_id = ? AND sign_in_process<>'已签到'";
-            Connection con3 = null;
-            PreparedStatement ps3 = null;
-            try {
-                con3 = SqlUtil.getConnection();
-                if (con3 == null) {
-                    return false;
-                }
-                ps3 = con3.prepareStatement(sql);
-                ps3.setLong(1, participantId);
-                return ps3.executeUpdate() > 0;
-            } catch (SQLException e) {
-                e.printStackTrace();
+        // 检查操作者身份
+        String checkIdentitySql = "SELECT p.participant_id, r.applicant_staff_id FROM participant p " +
+                "JOIN reservation r ON p.reservation_id = r.reservation_id " +
+                "WHERE p.participant_id = ?";
+        Connection con3 = null;
+        PreparedStatement ps3 = null;
+        try {
+            con3 = SqlUtil.getConnection();
+            if (con3 == null) {
                 return false;
-            } finally {
-                SqlUtil.closeAll(con3, ps3, null);
             }
+            ps3 = con3.prepareStatement(checkIdentitySql);
+            ps3.setLong(1, participantId);
+            ResultSet rs = ps3.executeQuery();
+            if (rs.next()) {
+                long applicantStaffId = rs.getLong("applicant_staff_id");
+                if (operatorId != applicantStaffId && operatorId != rs.getLong("participant_staff_id")) {
+                    return false; // 操作者既不是申请人也不是参会人员本人
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            SqlUtil.closeAll(con3, ps3, null);
+        }
+
+        // 执行签到
+        String sql = "UPDATE participant SET sign_in_process = '已签到', " +
+                "sign_in_time = NOW() WHERE participant_id = ? AND sign_in_process<>'已签到'";
+        Connection con4 = null;
+        PreparedStatement ps4 = null;
+        try {
+            con4 = SqlUtil.getConnection();
+            if (con4 == null) {
+                return false;
+            }
+            ps4 = con4.prepareStatement(sql);
+            ps4.setLong(1, participantId);
+            return ps4.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            SqlUtil.closeAll(con4, ps4, null);
         }
     }
+
 
     public List<Participant> listSignRecordsByDateAndDept(String date, long deptId) {
         String sql = "SELECT p.* FROM participant p " +
@@ -191,93 +219,22 @@ public class ParticipantDAO {
         return list;
     }
 
-    // ========== 在 ParticipantDAO 类的末尾添加以下方法 ==========
-
-    /**
-     * 指定会议，将该会议所属部门的所有员工签到（自动插入或更新参会记录）
-     * @param reservationId 会议ID
-     * @return 成功签到的人数
-     */
-    public int signInDepartmentByReservation(long reservationId) {
-        // 1. 查询会议部门ID、开始时间、状态
-        String infoSql = "SELECT apply_dept_id, start_time FROM reservation " +
-                "WHERE reservation_id = ? AND reservation_process = '已确认'";
+    public int signInAllParticipants(long reservationId) {
+        String sql = "UPDATE participant SET sign_in_process = '已签到', sign_in_time = NOW() " +
+                "WHERE reservation_id = ? AND sign_in_process <> '已签到'";
         Connection con = null;
-        PreparedStatement psInfo = null;
-        ResultSet rsInfo = null;
-        long deptId = -1;
-        Timestamp startTime = null;
+        PreparedStatement ps = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) {
-                return 0;
-            }
-            psInfo = con.prepareStatement(infoSql);
-            psInfo.setLong(1, reservationId);
-            rsInfo = psInfo.executeQuery();
-            if (rsInfo.next()) {
-                deptId = rsInfo.getLong("apply_dept_id");
-                startTime = rsInfo.getTimestamp("start_time");
-            } else {
-                return 0; // 会议不存在或未确认
-            }
+            if (con == null) return 0;
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, reservationId);
+            return ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
         } finally {
-            SqlUtil.closeAll(con, psInfo, rsInfo);
-        }
-
-        if (deptId <= 0 || startTime == null) {
-            return 0;
-        }
-        // 检查会议是否已开始
-        if (startTime.after(new Timestamp(System.currentTimeMillis()))) {
-            return 0; // 会议未开始
-        }
-
-        // 2. 获取该部门所有员工ID
-        List<Long> staffIds = new StaffDAO().getStaffIdsByDept(deptId);
-        if (staffIds.isEmpty()) {
-            return 0;
-        }
-
-        // 3. 先删除该会议原有的参会记录，再批量插入新记录（状态为已签到）
-        int signedCount = 0;
-        con = null;
-        try {
-            con = SqlUtil.getConnection();
-            con.setAutoCommit(false);
-
-            // 删除旧记录
-            String deleteSql = "DELETE FROM participant WHERE reservation_id = ?";
-            try (PreparedStatement psDel = con.prepareStatement(deleteSql)) {
-                psDel.setLong(1, reservationId);
-                psDel.executeUpdate();
-            }
-
-            // 插入新记录
-            String insertSql = "INSERT INTO participant (reservation_id, participant_staff_id, sign_in_process, sign_in_time) " +
-                    "VALUES (?, ?, '已签到', NOW())";
-            try (PreparedStatement psIns = con.prepareStatement(insertSql)) {
-                for (long sid : staffIds) {
-                    psIns.setLong(1, reservationId);
-                    psIns.setLong(2, sid);
-                    psIns.addBatch();
-                }
-                int[] results = psIns.executeBatch();
-                for (int r : results) {
-                    if (r > 0) signedCount++;
-                }
-            }
-
-            con.commit();
-            return signedCount;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        } finally {
-            SqlUtil.closeAll(con, null, null);
+            SqlUtil.closeAll(con, ps, null);
         }
     }
 

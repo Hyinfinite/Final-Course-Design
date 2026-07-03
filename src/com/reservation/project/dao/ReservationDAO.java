@@ -44,21 +44,24 @@ public class ReservationDAO {
         return "RES" + System.currentTimeMillis() + String.format("%03d", new Random().nextInt(1000));
     }
 
+    // 新增带参会人员列表的 addReservation 重载方法
     public boolean addReservation(String topic, long deptId, long applicantStaffId, long roomId,
-                                  Timestamp start, Timestamp end, int count, String desc) {
+                                  Timestamp start, Timestamp end, int count, String desc,
+                                  List<Long> participantIds) {
         String reservationNo = generateReservationNo();
         String sql = "INSERT INTO reservation(reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, " +
                 "reservation_room_id, start_time, end_time, participant_count, meeting_desc) " +
                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection con = null;
         PreparedStatement ps = null;
+        PreparedStatement psPart = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) {
-                return false;
-            }
+            if (con == null) return false;
             con.setAutoCommit(false);
-            ps = con.prepareStatement(sql);
+
+            // 1. 插入预约
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, reservationNo);
             ps.setString(2, topic);
             ps.setLong(3, deptId);
@@ -69,18 +72,44 @@ public class ReservationDAO {
             ps.setInt(8, count);
             ps.setString(9, desc);
             int affected = ps.executeUpdate();
-            if (affected > 0) {
-                con.commit();
-                return true;
+            if (affected <= 0) {
+                con.rollback();
+                return false;
             }
+
+            // 获取生成的 reservation_id
+            ResultSet rs = ps.getGeneratedKeys();
+            long reservationId = 0;
+            if (rs.next()) {
+                reservationId = rs.getLong(1);
+            }
+            rs.close();
+
+            // 2. 插入参会人员（状态未签到）
+            if (participantIds != null && !participantIds.isEmpty()) {
+                String partSql = "INSERT INTO participant(reservation_id, participant_staff_id, sign_in_process) VALUES(?, ?, '未签到')";
+                psPart = con.prepareStatement(partSql);
+                for (Long sid : participantIds) {
+                    psPart.setLong(1, reservationId);
+                    psPart.setLong(2, sid);
+                    psPart.addBatch();
+                }
+                psPart.executeBatch();
+            }
+
+            con.commit();
+            return true;
+
         } catch (Exception e) {
             e.printStackTrace();
+            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
             return false;
         } finally {
+            SqlUtil.closeAll(null, psPart, null);
             SqlUtil.closeAll(con, ps, null);
         }
-        return false;
     }
+
 
 
     public List<ReservationList> searchMyReservation(double applicant_id) {
@@ -196,25 +225,23 @@ public class ReservationDAO {
         String confirmSql = "INSERT INTO confirmation_log (reservation_id, confirmer_staff_id, confirm_process, confirm_comment) " +
                 "VALUES (?, ?, ?, ?)";
         Connection con = null;
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
+        PreparedStatement ps1 = null, ps2 = null;
 
         try {
             con = SqlUtil.getConnection();
-            if (con == null) {
-                return false;
-            }
+            if (con == null) return false;
             con.setAutoCommit(false);
 
+            // 1. 更新预约状态
             ps1 = con.prepareStatement(updateSql);
             ps1.setString(1, process);
             ps1.setLong(2, reservation_id);
-            int n = ps1.executeUpdate();
-            if (n <= 0) {
+            if (ps1.executeUpdate() <= 0) {
                 con.rollback();
                 return false;
             }
 
+            // 2. 记录审批日志
             ps2 = con.prepareStatement(confirmSql);
             ps2.setLong(1, reservation_id);
             ps2.setLong(2, manager_id);
@@ -226,11 +253,11 @@ public class ReservationDAO {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             SqlUtil.closeAll(con, ps2, null);
-            SqlUtil.closeAll(con, ps1, null);
+            SqlUtil.closeAll(null, ps1, null);
         }
-        return false;
     }
 
 
@@ -322,4 +349,18 @@ public class ReservationDAO {
         }
         return list;
     }
+
+    public boolean isReservationApplicant(long reservationId, long staffId) {
+        String sql = "SELECT 1 FROM reservation WHERE reservation_id = ? AND applicant_staff_id = ?";
+        try (Connection con = SqlUtil.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, reservationId);
+            ps.setLong(2, staffId);
+            return ps.executeQuery().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
