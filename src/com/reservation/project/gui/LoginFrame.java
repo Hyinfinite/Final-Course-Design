@@ -16,26 +16,32 @@ public class LoginFrame extends JFrame {
         setSize(420, 260);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridBagLayout());
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(8,8,8,8);
-        c.fill = GridBagConstraints.HORIZONTAL;
+        // 最外层使用 FlowLayout，通过它来制造左右和上下的边缘留白
+        setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
 
-        c.gridx=0;c.gridy=0; add(new JLabel("工号"), c);
-        c.gridx=1;c.gridy=0; add(tfNo, c);
+        // 创建一个容器面板，宽度撑满，形成左右留白的效果
+        JPanel container = new JPanel();
+        container.setLayout(new GridLayout(4, 2, 10, 8));
 
-        c.gridx=0;c.gridy=1; add(new JLabel("密码"), c);
-        c.gridx=1;c.gridy=1; add(tfPwd, c);
+        container.add(new JLabel("工号"));
+        container.add(tfNo);
 
-        c.gridx=0;c.gridy=2; add(new JLabel("角色"), c);
-        c.gridx=1;c.gridy=2; add(cbRole, c);
+        container.add(new JLabel("密码"));
+        container.add(tfPwd);
 
+        container.add(new JLabel("角色"));
+        container.add(cbRole);
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JButton btnLogin = new JButton("登录");
-        c.gridx=1;c.gridy=3; add(btnLogin, c);
+        btnPanel.add(btnLogin);
+        container.add(new JLabel());
+        container.add(btnPanel);
 
         btnLogin.addActionListener(e -> doLogin());
 
+        add(container);
         setVisible(true);
     }
 
