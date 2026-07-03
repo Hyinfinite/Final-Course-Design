@@ -70,21 +70,6 @@ public class ReservationDAO {
             ps.setString(9, desc);
             int affected = ps.executeUpdate();
             if (affected > 0) {
-                // 获取新创建的预约ID
-                long reservationId = getReservationIdByNo(reservationNo);
-                if (reservationId > 0) {
-                    // 生成参会人员列表（这里可以根据需要修改）
-                    List<Long> participants = new ArrayList<>();
-                    participants.add(applicantStaffId);  // 添加申请人自己
-                    // 这里可以添加更多的参会人员，例如：
-                    // participants.addAll(getDepartmentStaffIds(deptId));
-
-                    // 使用batchAddParticipants方法添加参会人员
-                    ParticipantDAO participantDAO = new ParticipantDAO();
-                    if (!participantDAO.batchAddParticipants(reservationId, participants)) {
-                        throw new Exception("添加参会人员失败");
-                    }
-                }
                 con.commit();
                 return true;
             }
@@ -292,5 +277,49 @@ public class ReservationDAO {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    /**
+     * 根据部门ID查询已确认且已开始的会议（用于签到选择）
+     * @param deptId 部门ID
+     * @return 预约列表
+     */
+    public List<ReservationList> searchConfirmedReservationsByDept(long deptId) {
+        List<ReservationList> list = new ArrayList<>();
+        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+                "FROM reservation r " +
+                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
+                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
+                "WHERE r.apply_dept_id = ? AND r.reservation_process = '已确认' " +
+                "AND r.start_time <= NOW() " +
+                "ORDER BY r.start_time DESC";
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            con = SqlUtil.getConnection();
+            if (con == null) return list;
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, deptId);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ReservationList ri = new ReservationList();
+                ri.setReservationId(rs.getLong("reservation_id"));
+                ri.setReservationNO(rs.getString("reservation_no"));
+                ri.setMeetingTopic(rs.getString("meeting_topic"));
+                ri.setRoomName(rs.getString("room_name"));
+                ri.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
+                ri.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
+                ri.setProcess(rs.getString("reservation_process"));
+                ri.setApplicantName(rs.getString("staff_name"));
+                list.add(ri);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            SqlUtil.closeAll(con, ps, rs);
+        }
+        return list;
     }
 }

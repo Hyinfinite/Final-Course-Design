@@ -69,12 +69,15 @@ create table participant (
 );
 
 
-insert into department(dept_name) values ('教务处'), ('后勤部'), ('财务处'), ('武装部');
+insert into department(dept_name) values ('系统管理部门'), ('会议室管理部门'), ('教导处');
 
 insert into admin_staff (staff_no, staff_name, dept_id, staff_password, gender, position, phone, access_level) values
 ('A001', '系统管理员', 1, '123456', '男', '系统管理员', '15310009013', 'SYS_Admin'), 
 ('M001', '会议室管理员', 2, '123456', '女', '会议室管理员', '19910019011', 'ROOM_Admin'),
-('T001', '张三', 3, '123456', '男', '老师', '13810099001', 'Staff');
+('T001', '张三', 3, '123456', '男', '老师', '13810099001', 'Staff'),
+('T002', '李四', 3, '123456', '男', '老师', '13810099002', 'Staff'),
+('T003', '王五', 3, '123456', '男', '老师', '13810099003', 'Staff'),
+('T004', '周六', 3, '123456', '男', '老师', '13810099004', 'Staff');
 
 
 insert into meeting_room (room_code, room_name, location, capacity, has_projector, has_audio) values

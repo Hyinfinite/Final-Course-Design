@@ -47,7 +47,7 @@ public class StaffFrame extends JFrame {
     };
 
     private DefaultTableModel signModel = new DefaultTableModel(
-            new Object[]{"记录ID","预约号","主题","开始","结束","参会人","签到状态","签到时间"}, 0) {
+            new Object[]{"记录ID","预约号","主题","开始时间","结束时间","参会部门","签到状态","签到时间"}, 0) {
         @Override
         public boolean isCellEditable(int r, int c) {
             return false;
@@ -185,84 +185,89 @@ public class StaffFrame extends JFrame {
 
     private JPanel buildSignPanel() {
         JPanel panel = new JPanel(new BorderLayout(8,8));
+
+        // 上部：操作区域，使用 FlowLayout 左对齐，默认组件大小
+        JPanel queryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+
+        // 会议下拉框（不设置首选大小，采用默认）
+        JComboBox<String> cbReservation = new JComboBox<>();
+
+        // 按钮
+        JButton btnLoadParticipants = new JButton("加载参会人员");
+        JButton btnSignDepartment = new JButton("部门签到");
+        JButton btnRefresh = new JButton("刷新会议列表");
+        JButton btnSignSelected = new JButton("签到选中记录");
+
+        // 添加组件
+        queryPanel.add(new JLabel("选择会议"));
+        queryPanel.add(cbReservation);
+        queryPanel.add(btnLoadParticipants);
+        queryPanel.add(btnSignDepartment);
+        queryPanel.add(btnRefresh);
+        queryPanel.add(btnSignSelected);
+
+        // 表格
         JTable table = new JTable(signModel);
         table.setRowHeight(28);
 
-        // 创建查询条件面板
-        JPanel queryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        // ====== 加载会议列表（仅本部门已确认且已开始的会议） ======
+        Runnable loadReservations = () -> {
+            cbReservation.removeAllItems();
+            List<ReservationList> list = new ReservationDAO().searchConfirmedReservationsByDept(user.getDeptId());
+            if (list.isEmpty()) {
+                cbReservation.addItem("暂无已开始会议");
+            } else {
+                for (ReservationList r : list) {
+                    String display = r.getReservationId() + " - " + r.getMeetingTopic()
+                            + " (" + r.getStartTime() + ")";
+                    cbReservation.addItem(display);
+                }
+            }
+        };
 
-        // 部门选择
-        JComboBox<String> cbDept = new JComboBox<>();
-        cbDept.addItem("全部部门");
-        List<String> depts = new DepartmentDAO().getAllDepartments();
-        for (String dept : depts) {
-            cbDept.addItem(dept);
-        }
-
-        // 时间选择
-        JTextField tfDate = new JTextField(10);
-        tfDate.setText(java.time.LocalDate.now().toString());
-
-        // 查询按钮
-        JButton btnQueryByDept = new JButton("按部门查询");
-        JButton btnQueryByDate = new JButton("按日期查询");
-        JButton btnRefresh = new JButton("刷新列表");
-        JButton btnSign = new JButton("签到选中记录");
-
-        // 添加组件到查询面板
-        queryPanel.add(new JLabel("部门筛选"));
-        queryPanel.add(cbDept);
-        queryPanel.add(btnQueryByDept);
-        queryPanel.add(new JLabel("日期筛选"));
-        queryPanel.add(tfDate);
-        queryPanel.add(btnQueryByDate);
-        queryPanel.add(btnRefresh);
-        queryPanel.add(btnSign);
-
-        // 部门查询事件
-        btnQueryByDept.addActionListener(e -> {
+        // ====== 加载参会人员 ======
+        btnLoadParticipants.addActionListener(e -> {
             signModel.setRowCount(0);
-            String selectedDept = (String) cbDept.getSelectedItem();
-            long deptId = "全部部门".equals(selectedDept) ? -1 : new DepartmentDAO().getDeptIdByName(selectedDept);
-            List<Participant> list = new ParticipantDAO().listSignRecordsByDept(deptId);
-            for (Participant x : list) {
-                signModel.addRow(new Object[]{
-                        x.getParticipantId(),
-                        x.getReservationNo(),
-                        x.getMeetingTopic(),
-                        x.getStartTime(),
-                        x.getEndTime(),
-                        x.getParticipantName(),
-                        x.getSignInProcess(),
-                        x.getSignInTime()
-                });
+            String selected = (String) cbReservation.getSelectedItem();
+            if (selected == null || selected.startsWith("暂无")) return;
+            try {
+                long rid = Long.parseLong(selected.split(" - ")[0]);
+                List<Participant> list = new ParticipantDAO().listParticipantsByReservation(rid);
+                for (Participant p : list) {
+                    signModel.addRow(new Object[]{
+                            p.getParticipantId(),
+                            p.getReservationNo(),
+                            p.getMeetingTopic(),
+                            p.getStartTime(),
+                            p.getEndTime(),
+                            p.getParticipantName(),
+                            p.getSignInProcess(),
+                            p.getSignInTime()
+                    });
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "加载失败：" + ex.getMessage());
             }
         });
 
-        // 日期查询事件
-        btnQueryByDate.addActionListener(e -> {
-            signModel.setRowCount(0);
-            List<Participant> list = new ParticipantDAO().listSignRecordsByDateAndDept(
-                    tfDate.getText().trim(),
-                    user.getDeptId()
-            );
-            for (Participant x : list) {
-                signModel.addRow(new Object[]{
-                        x.getParticipantId(),
-                        x.getReservationNo(),
-                        x.getMeetingTopic(),
-                        x.getStartTime(),
-                        x.getEndTime(),
-                        x.getParticipantName(),
-                        x.getSignInProcess(),
-                        x.getSignInTime()
-                });
+        // ====== 部门签到（一键签到全部门） ======
+        btnSignDepartment.addActionListener(e -> {
+            String selected = (String) cbReservation.getSelectedItem();
+            if (selected == null || selected.startsWith("暂无")) {
+                JOptionPane.showMessageDialog(this, "请先选择有效的会议");
+                return;
             }
+            long rid = Long.parseLong(selected.split(" - ")[0]);
+            int count = new ParticipantDAO().signInDepartmentByReservation(rid);
+            JOptionPane.showMessageDialog(this, "部门签到成功，已签到 " + count + " 人");
+            btnLoadParticipants.doClick(); // 刷新表格
         });
 
-        // 刷新和签到按钮事件保持不变
-        btnRefresh.addActionListener(e -> loadSignRecords());
-        btnSign.addActionListener(e -> {
+        // ====== 刷新会议列表 ======
+        btnRefresh.addActionListener(e -> loadReservations.run());
+
+        // ====== 单条签到（保留） ======
+        btnSignSelected.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row < 0) {
                 JOptionPane.showMessageDialog(this, "请先选中一条记录");
@@ -270,9 +275,12 @@ public class StaffFrame extends JFrame {
             }
             long participantId = Long.parseLong(signModel.getValueAt(row, 0).toString());
             boolean ok = new ParticipantDAO().signIn(participantId);
-            JOptionPane.showMessageDialog(this, ok ? "签到成功" : "签到失败（可能已签到）");
-            loadSignRecords();
+            JOptionPane.showMessageDialog(this, ok ? "签到成功" : "签到失败（可能已签到或会议未开始）");
+            btnLoadParticipants.doClick();
         });
+
+        // 初始加载会议列表
+        loadReservations.run();
 
         panel.add(queryPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
