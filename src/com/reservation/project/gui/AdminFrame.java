@@ -361,12 +361,13 @@ public class AdminFrame extends JFrame {
             if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
             try {
                 long staffId = Long.parseLong(model.getValueAt(row, 0).toString());
+                String no = tfNo.getText().trim();
                 String name = tfName.getText().trim();
                 long deptId = Long.parseLong(tfDept.getText().trim());
                 String gender = tfGender.getText().trim();
                 String pos = tfPos.getText().trim();
                 String phone = tfPhone.getText().trim();
-                boolean ok = dao.updateStaffBasic(staffId, name, deptId, gender, pos, phone);
+                boolean ok = dao.updateStaffBasic(staffId, no, name, deptId, gender, pos, phone);
                 JOptionPane.showMessageDialog(this, ok ? "修改成功" : "修改失败");
                 load.run(); // 刷新表格
             } catch (Exception ex) {

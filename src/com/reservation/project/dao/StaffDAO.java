@@ -75,9 +75,9 @@ public class StaffDAO {
         }
     }
 
-    public boolean updateStaffBasic(long staffId, String staffName, long deptId, String gender,
+    public boolean updateStaffBasic(long staffId, String staffNo, String staffName, long deptId, String gender,
                                     String position, String phone) {
-        String sql = "UPDATE admin_staff SET staff_name = ?, dept_id = ?, gender = ?, position = ?, phone = ? " +
+        String sql = "UPDATE admin_staff SET staff_no = ?, staff_name = ?, dept_id = ?, gender = ?, position = ?, phone = ? " +
                 "WHERE staff_id = ?";
         Connection con = null;
         PreparedStatement ps = null;
@@ -87,12 +87,13 @@ public class StaffDAO {
                 return false;
             }
             ps = con.prepareStatement(sql);
-            ps.setString(1, staffName);
-            ps.setLong(2, deptId);
-            ps.setString(3, gender);
-            ps.setString(4, position);
-            ps.setString(5, phone);
-            ps.setLong(6, staffId);
+            ps.setString(1, staffNo);
+            ps.setString(2, staffName);
+            ps.setLong(3, deptId);
+            ps.setString(4, gender);
+            ps.setString(5, position);
+            ps.setString(6, phone);
+            ps.setLong(7, staffId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,8 +145,8 @@ public class StaffDAO {
         }
     }
 
-    public boolean updateOwnProfile(long staffId, String staffName, String gender, String position, String phone) {
-        String sql = "UPDATE admin_staff SET staff_name = ?, gender = ?, position = ?, phone = ? " +
+    public boolean updateOwnProfile(long staffId, String staffNo, String staffName, String gender, String position, String phone) {
+        String sql = "UPDATE admin_staff SET staff_no = ?, staff_name = ?, gender = ?, position = ?, phone = ? " +
                 "WHERE staff_id = ?";
         Connection con = null;
         PreparedStatement ps = null;
@@ -155,11 +156,12 @@ public class StaffDAO {
                 return false;
             }
             ps = con.prepareStatement(sql);
-            ps.setString(1, staffName);
-            ps.setString(2, gender);
-            ps.setString(3, position);
-            ps.setString(4, phone);
-            ps.setLong(5, staffId);
+            ps.setString(1, staffNo);
+            ps.setString(2, staffName);
+            ps.setString(3, gender);
+            ps.setString(4, position);
+            ps.setString(5, phone);
+            ps.setLong(6, staffId);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

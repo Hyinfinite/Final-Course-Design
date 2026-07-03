@@ -18,6 +18,7 @@ public class ProfileDialog extends JDialog {
     private final StaffDAO dao = new StaffDAO();
 
     // 个人信息输入框
+    private JTextField tfStaffNo = new JTextField(16);  // 工号输入框
     private JTextField tfName = new JTextField(16);    // 姓名输入框
     private JTextField tfGender = new JTextField(8);   // 性别输入框
     private JTextField tfPos = new JTextField(16);     // 职务输入框
@@ -50,14 +51,13 @@ public class ProfileDialog extends JDialog {
         loadProfile();
     }
 
-/**
- * 构建个人信息面板
- * 该方法创建一个包含5行2列的网格布局面板，用于显示和编辑用户个人信息
- * @return 配置好的JPanel面板，包含姓名、性别、职务、电话等输入框和保存按钮
- */
     private JPanel buildProfilePanel() {
-        // 创建一个使用5行2列布局，并设置水平和垂直间距为10像素的面板
-        JPanel p = new JPanel(new GridLayout(5, 2, 10, 10));
+        // 创建一个使用6行2列布局，并设置水平和垂直间距为10像素的面板
+        JPanel p = new JPanel(new GridLayout(6, 2, 10, 10));
+
+        // 添加工号标签和文本框
+        p.add(new JLabel("工号"));
+        p.add(tfStaffNo);
 
         // 添加姓名标签和文本框
         p.add(new JLabel("姓名"));
@@ -81,23 +81,34 @@ public class ProfileDialog extends JDialog {
         JButton btnSave = new JButton("保存信息");
         p.add(btnSave);
 
-        // 为保存按钮添加事件监听器，点击时调用DAO更新用户个人信息
+        // 为保存按钮添加事件监听器
         btnSave.addActionListener(e -> {
-                // 调用DAO更新用户信息，并获取操作结果
+            // 验证工号是否为空
+            if (tfStaffNo.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "工号不能为空");
+                return;
+            }
+            // 验证姓名是否为空
+            if (tfName.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "姓名不能为空");
+                return;
+            }
+
+            // 调用DAO更新用户信息
             boolean ok = dao.updateOwnProfile(
                     loginUser.getStaffId(),
+                    tfStaffNo.getText().trim(),
                     tfName.getText().trim(),
                     tfGender.getText().trim(),
                     tfPos.getText().trim(),
                     tfPhone.getText().trim()
             );
-            // 根据操作结果显示相应的提示信息
             JOptionPane.showMessageDialog(this, ok ? "保存成功" : "保存失败");
         });
 
-        // 返回构建好的面板
         return p;
     }
+
 
 
     /**
@@ -167,10 +178,10 @@ public class ProfileDialog extends JDialog {
         if (s == null) return;
 
         // 将查询到的用户信息更新到界面上的各个文本框中
+        tfStaffNo.setText(s.getStaffNo());  // 设置工号
         tfName.setText(s.getStaffName());    // 设置姓名
         tfGender.setText(s.getGender());     // 设置性别
         tfPos.setText(s.getPosition());      // 设置职务
-        tfPos.setText(s.getPosition());      // 设置职务（重复赋值，可能是笔误）
         tfPhone.setText(s.getPhone());      // 设置电话
     }
 }

@@ -10,16 +10,16 @@ public class UserDAO {
         String sql = "SELECT staff_id, staff_no, staff_name, dept_id, access_level FROM admin_staff " +
                      "WHERE staff_no = ? AND staff_password = ? AND access_Level = ?";
         Connection con = null;
-        PreparedStatement stm = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             con = SqlUtil.getConnection();
-            stm = con.prepareStatement(sql);
-            stm.setString(1, staffNo);
-            stm.setString(2, password);
-            stm.setString(3, accessLevel);
+            ps = con.prepareStatement(sql);
+            ps.setString(1, staffNo);
+            ps.setString(2, password);
+            ps.setString(3, accessLevel);
 
-            rs = stm.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
                 User u = new User();
                 u.setStaffId(rs.getLong("staff_id"));
@@ -32,7 +32,7 @@ public class UserDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            SqlUtil.closeAll(con, stm, rs);
+            SqlUtil.closeAll(con, ps, rs);
         }
         return null;
     }

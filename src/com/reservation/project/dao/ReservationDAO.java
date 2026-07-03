@@ -7,6 +7,7 @@ import com.reservation.project.util.SqlUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ReservationDAO {
     public boolean hasConflict(long room_id, Timestamp start_time, Timestamp end_time) {
@@ -39,10 +40,16 @@ public class ReservationDAO {
         return true;
     }
 
-    public boolean addReservation(String topic, long dept_id, long applicant_id, long room_id, Timestamp start_time, Timestamp end_time, int count, String desc) {
-        String sql = "INSERT INTO reservation " +
-                "(reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, reservation_room_id, start_time, end_time, participant_count, meeting_desc, reservation_process) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, '待确认')";
+    private String generateReservationNo() {
+        return "RES" + System.currentTimeMillis() + String.format("%03d", new Random().nextInt(1000));
+    }
+
+    public boolean addReservation(String topic, long deptId, long applicantStaffId, long roomId,
+                                  Timestamp start, Timestamp end, int count, String desc) {
+        String reservationNo = generateReservationNo();
+        String sql = "INSERT INTO reservation(reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, " +
+                "reservation_room_id, start_time, end_time, participant_count, meeting_desc) " +
+                "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -50,25 +57,46 @@ public class ReservationDAO {
             if (con == null) {
                 return false;
             }
-
+            con.setAutoCommit(false);
             ps = con.prepareStatement(sql);
-            ps.setString(1, ReservationNOUtil.ReservationNO());
+            ps.setString(1, reservationNo);
             ps.setString(2, topic);
-            ps.setLong(3, dept_id);
-            ps.setLong(4, applicant_id);
-            ps.setLong(5, room_id);
-            ps.setTimestamp(6, start_time);
-            ps.setTimestamp(7, end_time);
+            ps.setLong(3, deptId);
+            ps.setLong(4, applicantStaffId);
+            ps.setLong(5, roomId);
+            ps.setTimestamp(6, start);
+            ps.setTimestamp(7, end);
             ps.setInt(8, count);
             ps.setString(9, desc);
-            return ps.executeUpdate() > 0;
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                // 获取新创建的预约ID
+                long reservationId = getReservationIdByNo(reservationNo);
+                if (reservationId > 0) {
+                    // 生成参会人员列表（这里可以根据需要修改）
+                    List<Long> participants = new ArrayList<>();
+                    participants.add(applicantStaffId);  // 添加申请人自己
+                    // 这里可以添加更多的参会人员，例如：
+                    // participants.addAll(getDepartmentStaffIds(deptId));
+
+                    // 使用batchAddParticipants方法添加参会人员
+                    ParticipantDAO participantDAO = new ParticipantDAO();
+                    if (!participantDAO.batchAddParticipants(reservationId, participants)) {
+                        throw new Exception("添加参会人员失败");
+                    }
+                }
+                con.commit();
+                return true;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         } finally {
             SqlUtil.closeAll(con, ps, null);
         }
+        return false;
     }
+
 
     public List<ReservationList> searchMyReservation(double applicant_id) {
         List<ReservationList> list = new ArrayList<ReservationList>();
@@ -249,5 +277,20 @@ public class ReservationDAO {
             SqlUtil.closeAll(con, ps, rs);
         }
         return c;
+    }
+
+    public long getReservationIdByNo(String reservationNo) {
+        String sql = "SELECT reservation_id FROM reservation WHERE reservation_no = ?";
+        try (Connection conn = SqlUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, reservationNo);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("reservation_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }
