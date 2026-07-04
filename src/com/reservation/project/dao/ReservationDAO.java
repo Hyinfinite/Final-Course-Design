@@ -118,7 +118,7 @@ public class ReservationDAO {
         String sql = "SELECT " +
                 "r.reservation_id, r.reservation_no, r.meeting_topic, " +
                 "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name, " +
-                "cl.confirm_comment " +
+                "cl.confirm_comment, r.participant_count " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
@@ -147,6 +147,7 @@ public class ReservationDAO {
                 ri.setRoomName(rs.getString("room_name"));
                 ri.setStartTime(rs.getString("start_time"));
                 ri.setEndTime(rs.getString("end_time"));
+                ri.setParticipantCount(rs.getInt("participant_count"));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
                 ri.setComment(rs.getString("confirm_comment"));
@@ -186,7 +187,7 @@ public class ReservationDAO {
     public List<ReservationList> searchPendingReservation() {
         List<ReservationList> list = new ArrayList<ReservationList>();
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
@@ -211,6 +212,7 @@ public class ReservationDAO {
                 ri.setRoomName(rs.getString("room_name"));
                 ri.setStartTime(rs.getString("start_time"));
                 ri.setEndTime(rs.getString("end_time"));
+                ri.setParticipantCount(rs.getInt("participant_count"));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
                 ri.setComment(rs.getString("confirm_comment"));
@@ -273,7 +275,7 @@ public class ReservationDAO {
     public List<ReservationList> searchConfirmedReservationsByDept(long deptId) {
         List<ReservationList> list = new ArrayList<>();
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
@@ -298,6 +300,7 @@ public class ReservationDAO {
                 ri.setRoomName(rs.getString("room_name"));
                 ri.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
                 ri.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
+                ri.setParticipantCount(rs.getInt("participant_count"));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
                 ri.setComment(rs.getString("confirm_comment"));

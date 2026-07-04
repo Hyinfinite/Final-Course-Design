@@ -29,11 +29,12 @@ public class StaffFrame extends JFrame {
     private JPanel checkboxPanel = new JPanel(new GridLayout(0, 2, 5, 2));
     private java.util.List<JCheckBox> staffCheckBoxes = new java.util.ArrayList<>();
     private JLabel lblSelectedCount = new JLabel("已选 0 人");
+    private JLabel lblTotalCount = new JLabel("总人数：0");
 
 
     // 我的预约表格
     private DefaultTableModel myModel = new DefaultTableModel(
-            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态", "审批意见"}, 0) {
+            new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","审批意见"}, 0) {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
 
@@ -118,12 +119,15 @@ public class StaffFrame extends JFrame {
         JPanel staffPanel = new JPanel(new BorderLayout(5, 5));
         staffPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
+        // 在提交预约面板的参会人员选择区域添加人数统计
+        JLabel lblTotalCount = new JLabel("总人数：0");
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnSelectAll = new JButton("全选");
         JButton btnDeselectAll = new JButton("取消全选");
         controlPanel.add(btnSelectAll);
         controlPanel.add(btnDeselectAll);
         controlPanel.add(lblSelectedCount);
+        controlPanel.add(lblTotalCount);
 
         JScrollPane scrollStaff = new JScrollPane(checkboxPanel);
         scrollStaff.setPreferredSize(new Dimension(400, 100));
@@ -185,8 +189,12 @@ public class StaffFrame extends JFrame {
 
     // 更新已选人数显示
     private void updateSelectedCount() {
+        // 计算已选人数
         long count = staffCheckBoxes.stream().filter(JCheckBox::isSelected).count();
+        // 更新已选人数标签
         lblSelectedCount.setText("已选 " + count + " 人");
+        // 更新总人数标签
+        lblTotalCount.setText("总人数：" + staffCheckBoxes.size());
     }
 
     // -------------------- 我的预约面板 --------------------
@@ -463,7 +471,7 @@ public class StaffFrame extends JFrame {
         for (ReservationList r : list) {
             myModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(),
-                    r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getProcess(), r.getComment()
+                    r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(), r.getComment()
             });
         }
     }

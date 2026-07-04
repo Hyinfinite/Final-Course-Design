@@ -19,7 +19,7 @@ public class ReservationQueryDAO {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name,");
-        sb.append("r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment ");
+        sb.append("r.start_time, r.end_time, r.reservation_process, a.staff_name, r.participant_count, cl.confirm_comment ");
         sb.append("FROM reservation r ");
         sb.append("JOIN meeting_room m ON r.reservation_room_id = m.room_id ");
         sb.append("JOIN admin_staff a ON r.applicant_staff_id = a.staff_id ");
@@ -66,6 +66,7 @@ public class ReservationQueryDAO {
                 r.setRoomName(rs.getString("room_name"));
                 r.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
                 r.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
+                r.setParticipantCount(rs.getInt("participant_count"));
                 r.setProcess(rs.getString("reservation_process"));
                 r.setApplicantName(rs.getString("staff_name"));
                 r.setComment(rs.getString("confirm_comment"));

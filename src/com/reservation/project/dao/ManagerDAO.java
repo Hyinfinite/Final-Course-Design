@@ -23,7 +23,7 @@ public class ManagerDAO {
         List<ReservationList> list = new ArrayList<ReservationList>();
         // SQL查询语句，用于获取已处理的预约记录及其相关信息
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
@@ -54,6 +54,7 @@ public class ManagerDAO {
                 r.setRoomName(rs.getString("room_name"));
                 r.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
                 r.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
+                r.setParticipantCount(rs.getInt("participant_count"));
                 r.setProcess(rs.getString("reservation_process"));
                 r.setApplicantName(rs.getString("staff_name"));
                 r.setComment(rs.getString("confirm_comment"));

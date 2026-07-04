@@ -10,6 +10,7 @@ public class ReservationList {
     private String endTime;
     private String process;
     private String applicantName;
+    private int participantCount;
     private String comment;
 
     public long getReservationId() {
@@ -73,6 +74,14 @@ public class ReservationList {
     }
     public void setApplicantName(String applicantName) {
         this.applicantName = applicantName;
+    }
+
+    public int getParticipantCount() {
+        return participantCount;
+    }
+
+    public void setParticipantCount(int participantCount) {
+        this.participantCount = participantCount;
     }
 
     public String getComment() {

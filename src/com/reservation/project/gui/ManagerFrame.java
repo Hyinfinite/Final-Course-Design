@@ -21,7 +21,7 @@ public class ManagerFrame extends JFrame {
 
     /** 待确认预约的表格模型，包含ID、预约号、主题、会议室、开始时间、结束时间、状态和申请人等列 */
     private DefaultTableModel pendingModel = new DefaultTableModel(
-            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态","申请人","审批意见"}, 0) {
+            new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","申请人","审批意见"}, 0) {
         @Override
         public boolean isCellEditable(int r, int c) {
             return false;  // 设置表格单元格不可编辑
@@ -30,7 +30,7 @@ public class ManagerFrame extends JFrame {
 
     /** 历史记录的表格模型，包含与待确认预约表格相同的列 */
     private DefaultTableModel historyModel = new DefaultTableModel(
-            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态","申请人","审批意见"}, 0) {
+            new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","申请人","审批意见"}, 0) {
         @Override
         public boolean isCellEditable(int r, int c) {
             return false;  // 设置表格单元格不可编辑
@@ -178,7 +178,8 @@ public class ManagerFrame extends JFrame {
         for (ReservationList r : list) {
             pendingModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
-                    r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName(), r.getComment()
+                    r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(),
+                    r.getApplicantName(), r.getComment()
             });
         }
     }
@@ -193,7 +194,8 @@ public class ManagerFrame extends JFrame {
         for (ReservationList r : list) {
             historyModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
-                    r.getStartTime(), r.getEndTime(), r.getProcess(), r.getApplicantName(), r.getComment()
+                    r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(),
+                    r.getApplicantName(), r.getComment()
             });
         }
     }
