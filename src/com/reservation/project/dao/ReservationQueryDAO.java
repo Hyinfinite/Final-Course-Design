@@ -19,10 +19,11 @@ public class ReservationQueryDAO {
 
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name,");
-        sb.append("r.start_time, r.end_time, r.reservation_process, a.staff_name ");
+        sb.append("r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment ");
         sb.append("FROM reservation r ");
         sb.append("JOIN meeting_room m ON r.reservation_room_id = m.room_id ");
         sb.append("JOIN admin_staff a ON r.applicant_staff_id = a.staff_id ");
+        sb.append("LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id ");
         sb.append("WHERE 1=1 ");
 
         List<Object> params = new ArrayList<Object>();
@@ -67,6 +68,7 @@ public class ReservationQueryDAO {
                 r.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
                 r.setProcess(rs.getString("reservation_process"));
                 r.setApplicantName(rs.getString("staff_name"));
+                r.setComment(rs.getString("confirm_comment"));
                 list.add(r);
             }
         } catch (Exception e) {

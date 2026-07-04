@@ -22,13 +22,13 @@ public class ManagerDAO {
         // 初始化结果列表
         List<ReservationList> list = new ArrayList<ReservationList>();
         // SQL查询语句，用于获取已处理的预约记录及其相关信息
-        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name," +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
-                "WHERE r.reservation_process IN ('已确认','已驳回','已取消') " +
-                "ORDER BY r.created_at DESC";
+                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
+                "WHERE r.reservation_process IN ('已确认', '已驳回') ORDER BY r.created_at DESC";
 
         // 声明数据库连接对象、预处理语句对象和结果集对象
         Connection con = null;
@@ -56,6 +56,7 @@ public class ManagerDAO {
                 r.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
                 r.setProcess(rs.getString("reservation_process"));
                 r.setApplicantName(rs.getString("staff_name"));
+                r.setComment(rs.getString("confirm_comment"));
                 list.add(r);
             }
         } catch (Exception e) {

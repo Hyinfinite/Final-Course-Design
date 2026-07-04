@@ -33,7 +33,7 @@ public class StaffFrame extends JFrame {
 
     // 我的预约表格
     private DefaultTableModel myModel = new DefaultTableModel(
-            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态"}, 0) {
+            new Object[]{"ID","预约号","主题","会议室","开始","结束","状态", "审批意见"}, 0) {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
 
@@ -443,7 +443,7 @@ public class StaffFrame extends JFrame {
         for (ReservationList r : list) {
             myModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(),
-                    r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getProcess()
+                    r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getProcess(), r.getComment()
             });
         }
     }

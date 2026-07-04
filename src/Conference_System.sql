@@ -41,6 +41,7 @@ create table reservation (
     participant_count int not null,
     meeting_desc varchar(1000),
     reservation_process varchar(50) not null default '待确认',
+    reservation_comment varchar(500),
     created_at datetime default current_timestamp,
     foreign key (apply_dept_id) references department (dept_id),
     foreign key (applicant_staff_id) references admin_staff (staff_id),

@@ -117,10 +117,12 @@ public class ReservationDAO {
 
         String sql = "SELECT " +
                 "r.reservation_id, r.reservation_no, r.meeting_topic, " +
-                "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+                "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name, " +
+                "cl.confirm_comment " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
+                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
                 "WHERE r.applicant_staff_id = ? " +
                 "ORDER BY r.created_at DESC";
 
@@ -147,6 +149,7 @@ public class ReservationDAO {
                 ri.setEndTime(rs.getString("end_time"));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
+                ri.setComment(rs.getString("confirm_comment"));
                 list.add(ri);
             }
         } catch (Exception e) {
@@ -183,10 +186,11 @@ public class ReservationDAO {
     public List<ReservationList> searchPendingReservation() {
         List<ReservationList> list = new ArrayList<ReservationList>();
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
+                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
                 "WHERE r.reservation_process = '待确认' ORDER BY r.created_at DESC";
         Connection con = null;
         PreparedStatement ps = null;
@@ -209,6 +213,7 @@ public class ReservationDAO {
                 ri.setEndTime(rs.getString("end_time"));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
+                ri.setComment(rs.getString("confirm_comment"));
                 list.add(ri);
             }
         } catch (Exception e) {
@@ -268,10 +273,11 @@ public class ReservationDAO {
     public List<ReservationList> searchConfirmedReservationsByDept(long deptId) {
         List<ReservationList> list = new ArrayList<>();
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name " +
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment " +
                 "FROM reservation r " +
                 "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
                 "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
+                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
                 "WHERE r.apply_dept_id = ? AND r.reservation_process = '已确认' " +
                 "AND r.start_time <= NOW() " +
                 "ORDER BY r.start_time DESC";
@@ -294,6 +300,7 @@ public class ReservationDAO {
                 ri.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
                 ri.setProcess(rs.getString("reservation_process"));
                 ri.setApplicantName(rs.getString("staff_name"));
+                ri.setComment(rs.getString("confirm_comment"));
                 list.add(ri);
             }
         } catch (Exception e) {
