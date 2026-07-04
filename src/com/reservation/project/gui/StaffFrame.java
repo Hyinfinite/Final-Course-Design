@@ -45,7 +45,7 @@ public class StaffFrame extends JFrame {
 
     // 签到管理表格
     private DefaultTableModel signModel = new DefaultTableModel(
-            new Object[]{"记录ID","预约号","主题","开始时间","结束时间","参会人","签到状态","签到时间"}, 0) {
+            new Object[]{"记录ID","预约号","主题","开始时间","结束时间","参会人工号","参会人","签到状态","签到时间"}, 0) {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
 
@@ -174,6 +174,9 @@ public class StaffFrame extends JFrame {
             cb.addActionListener(e -> updateSelectedCount());
             staffCheckBoxes.add(cb);
             checkboxPanel.add(cb);
+            if (s.getStaffId() == user.getStaffId()) {
+                cb.setSelected(true);
+            }
         }
         checkboxPanel.revalidate();
         checkboxPanel.repaint();
@@ -297,6 +300,7 @@ public class StaffFrame extends JFrame {
                             p.getMeetingTopic(),
                             p.getStartTime(),
                             p.getEndTime(),
+                            p.getParticipantStaffNo(),
                             p.getParticipantName(),
                             p.getSignInProcess(),
                             p.getSignInTime()
@@ -385,6 +389,12 @@ public class StaffFrame extends JFrame {
                 return;
             }
 
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            if (start.before(now)) {
+                JOptionPane.showMessageDialog(this, "开始时间不能早于当前时间");
+                return;
+            }
+
             // 3. 会议主题
             String topic = tfTopic.getText().trim();
             if (topic.isEmpty()) {
@@ -397,8 +407,13 @@ public class StaffFrame extends JFrame {
                     .filter(JCheckBox::isSelected)
                     .map(cb -> (Long) cb.getClientProperty("staffId"))
                     .collect(Collectors.toList());
-            if (selectedStaffIds.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "请至少选择一位参会人员");
+            // 确保当前用户在参会人员列表中
+            if (!selectedStaffIds.contains(user.getStaffId())) {
+                selectedStaffIds.add(user.getStaffId());
+            }
+            // 添加参会人数校验
+            if (selectedStaffIds.size() < 2) {
+                JOptionPane.showMessageDialog(this, "参会人数必须大于等于2人");
                 return;
             }
 
@@ -429,7 +444,12 @@ public class StaffFrame extends JFrame {
             JOptionPane.showMessageDialog(this, ok ? "提交成功（待确认）" : "提交失败");
             if (ok) {
                 loadMyReservations();
-                // 清空表单？可选
+                // 清空表单
+                tfTopic.setText("");
+                tfDesc.setText("");
+                //刷新会议室和人员勾选列表
+                loadRoomOptions();
+                refreshStaffCheckList();
             }
 
         } catch (Exception e) {

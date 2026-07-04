@@ -61,7 +61,8 @@ public class ParticipantDAO {
         }
 
         // 检查操作者身份
-        String checkIdentitySql = "SELECT p.participant_id, r.applicant_staff_id FROM participant p " +
+        String checkIdentitySql = "SELECT p.participant_id, r.applicant_staff_id, p.participant_staff_id " +
+                "FROM participant p " +
                 "JOIN reservation r ON p.reservation_id = r.reservation_id " +
                 "WHERE p.participant_id = ?";
         Connection con3 = null;
@@ -74,12 +75,16 @@ public class ParticipantDAO {
             ps3 = con3.prepareStatement(checkIdentitySql);
             ps3.setLong(1, participantId);
             ResultSet rs = ps3.executeQuery();
+            // 检查操作者身份
             if (rs.next()) {
                 long applicantStaffId = rs.getLong("applicant_staff_id");
-                if (operatorId != applicantStaffId && operatorId != rs.getLong("participant_staff_id")) {
-                    return false; // 操作者既不是申请人也不是参会人员本人
+                long participantStaffId = rs.getLong("participant_staff_id");
+                // 只允许申请人和参会人员本人签到
+                if (operatorId != applicantStaffId && operatorId != participantStaffId) {
+                    return false;
                 }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -137,7 +142,7 @@ public class ParticipantDAO {
         List<Participant> list = new ArrayList<>();
         String sql = "SELECT p.participant_id, p.reservation_id, r.reservation_no, r.meeting_topic, " +
                 "r.start_time, r.end_time, p.participant_staff_id, a.staff_name, " +
-                "p.sign_in_process, p.sign_in_time " +
+                "p.sign_in_process, p.sign_in_time , a.staff_no " +
                 "FROM participant p " +
                 "JOIN reservation r ON p.reservation_id = r.reservation_id " +
                 "JOIN admin_staff a ON p.participant_staff_id = a.staff_id " +
@@ -161,6 +166,7 @@ public class ParticipantDAO {
                 x.setStartTime(String.valueOf(rs.getTimestamp("start_time")));
                 x.setEndTime(String.valueOf(rs.getTimestamp("end_time")));
                 x.setParticipantStaffId(rs.getLong("participant_staff_id"));
+                x.setParticipantStaffNo(rs.getString("staff_no"));
                 x.setParticipantName(rs.getString("staff_name"));
                 x.setSignInProcess(rs.getString("sign_in_process"));
                 x.setSignInTime(rs.getTimestamp("sign_in_time") == null ? "" : String.valueOf(rs.getTimestamp("sign_in_time")));

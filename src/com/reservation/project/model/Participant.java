@@ -8,6 +8,7 @@ public class Participant {
     private String startTime;
     private String endTime;
     private long participantStaffId;
+    private String participantStaffNo;
     private String participantName;
     private String signInProcess;
     private String signInTime;
@@ -59,6 +60,14 @@ public class Participant {
     }
     public void setParticipantStaffId(long participantStaffId) {
         this.participantStaffId = participantStaffId;
+    }
+
+    public String getParticipantStaffNo() {
+        return participantStaffNo;
+    }
+
+    public void setParticipantStaffNo(String participantStaffNo) {
+        this.participantStaffNo = participantStaffNo;
     }
 
     public String getParticipantName() {
