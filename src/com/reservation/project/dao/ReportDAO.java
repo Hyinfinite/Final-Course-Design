@@ -10,8 +10,6 @@ import java.util.List;
 
 public class ReportDAO {
 
-    // month 格式：2026-07
-    // 假设每个会议室每月可用总时长：30天 * 8小时 * 60分钟 = 14400（用于课程设计近似统计）
     public List<RoomUsageStat> roomUsageByMonth(String month) {
         List<RoomUsageStat> list = new ArrayList<RoomUsageStat>();
         String sql = "SELECT m.room_id , m.room_name, " +

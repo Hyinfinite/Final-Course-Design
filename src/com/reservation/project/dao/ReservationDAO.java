@@ -260,52 +260,6 @@ public class ReservationDAO {
         }
     }
 
-
-    public int[] processCount() {
-        int[] c = new int[3];
-        String sql = "SELECT COUNT(*) AS total, " +
-                "SUM(CASE WHEN reservation_process = '待确认' THEN 1 ELSE 0 END) AS pending, " +
-                "SUM(CASE WHEN reservation_process = '已确认' THEN 1 ELSE 0 END) AS confirmed " +
-                "FROM reservation";
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            con = SqlUtil.getConnection();
-            if (con == null) {
-                return c;
-            }
-
-            ps = con.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                c[0] = rs.getInt("total");
-                c[1] = rs.getInt("pending");
-                c[2] = rs.getInt("confirmed");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            SqlUtil.closeAll(con, ps, rs);
-        }
-        return c;
-    }
-
-    public long getReservationIdByNo(String reservationNo) {
-        String sql = "SELECT reservation_id FROM reservation WHERE reservation_no = ?";
-        try (Connection conn = SqlUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, reservationNo);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getLong("reservation_id");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
     /**
      * 根据部门ID查询已确认且已开始的会议（用于签到选择）
      * @param deptId 部门ID

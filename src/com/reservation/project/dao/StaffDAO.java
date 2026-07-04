@@ -228,35 +228,6 @@ public class StaffDAO {
         return null;
     }
 
-    // ========== 在 StaffDAO 类的末尾添加以下方法 ==========
-
-    /**
-     * 根据部门ID获取该部门所有行政人员的staff_id列表
-     * @param deptId 部门ID
-     * @return 员工ID列表
-     */
-    public List<Long> getStaffIdsByDept(long deptId) {
-        List<Long> ids = new ArrayList<>();
-        String sql = "SELECT staff_id FROM admin_staff WHERE dept_id = ?";
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            con = SqlUtil.getConnection();
-            if (con == null) return ids;
-            ps = con.prepareStatement(sql);
-            ps.setLong(1, deptId);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                ids.add(rs.getLong("staff_id"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            SqlUtil.closeAll(con, ps, rs);
-        }
-        return ids;
-    }
 
     // 根据部门ID获取该部门所有员工信息
     public List<StaffInfo> getStaffByDept(long deptId) {
