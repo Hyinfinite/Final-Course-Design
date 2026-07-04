@@ -16,8 +16,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * StaffFrame类 - 行政人员界面
+ * 继承自JFrame，为行政人员提供会议室预约管理功能
+ */
 public class StaffFrame extends JFrame {
-    private final User user;
+    private final User user; // 当前登录用户信息
 
     // 提交预约组件
     private JComboBox<String> cbRoom = new JComboBox<>();
@@ -50,42 +54,62 @@ public class StaffFrame extends JFrame {
         @Override public boolean isCellEditable(int r, int c) { return false; }
     };
 
+    /**
+     * 行政人员界面构造函数
+     * @param user 当前登录的用户对象
+     */
     public StaffFrame(User user) {
-        this.user = user;
+        this.user = user;  // 保存用户对象
 
+        // 设置窗口标题、大小、位置和关闭操作
         setTitle("行政人员 - " + user.getStaffName());
         setSize(1220, 780);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout(8,8));
+        setLayout(new BorderLayout(8,8));  // 使用边界布局，组件间距为8像素
 
+        // 创建顶部标签，显示当前用户信息
         JLabel head = new JLabel("当前用户：" + user.getStaffName() + "（STAFF）");
-        head.setBorder(BorderFactory.createEmptyBorder(8,10,8,10));
+        head.setBorder(BorderFactory.createEmptyBorder(8,10,8,10));  // 设置边距
 
+        // 创建选项卡面板，包含四个功能选项卡
         JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("提交预约", buildSubmitPanel());
-        tabs.addTab("我的预约", buildMyPanel());
-        tabs.addTab("会议室空闲查询", buildFreePanel());
-        tabs.addTab("签到管理", buildSignPanel());
+        tabs.addTab("提交预约", buildSubmitPanel());      // 提交预约选项卡
+        tabs.addTab("我的预约", buildMyPanel());        // 我的预约选项卡
+        tabs.addTab("会议室空闲查询", buildFreePanel());  // 会议室空闲查询选项卡
+        tabs.addTab("签到管理", buildSignPanel());      // 签到管理选项卡
 
+        // 创建底部面板，包含个人信息按钮
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnProfile = new JButton("个人信息/修改密码");
-        bottom.add(btnProfile);
+        bottom.add(btnProfile);  // 将按钮添加到底部面板
 
-        add(head, BorderLayout.NORTH);
-        add(tabs, BorderLayout.CENTER);
-        add(bottom, BorderLayout.SOUTH);
 
+
+        // 将各组件添加到窗口中
+        add(head, BorderLayout.NORTH);    // 顶部标签
+        add(tabs, BorderLayout.CENTER);    // 选项卡面板
+        add(bottom, BorderLayout.SOUTH);   // 底部按钮面板
+
+        // 为个人信息按钮添加点击事件，打开个人信息对话框
         btnProfile.addActionListener(e -> new ProfileDialog(this, user).setVisible(true));
 
-        loadRoomOptions();
-        refreshStaffCheckList();          // 加载本部门员工
-        loadMyReservations();
-        setVisible(true);
+
+
+        // 加载必要的数据
+        loadRoomOptions();              // 加载会议室选项
+        refreshStaffCheckList();          // 加载本部门员工列表
+        loadMyReservations();           // 加载当前用户的预约记录
+        setVisible(true);               // 显示窗口
     }
 
     // -------------------- 提交预约面板 --------------------
+    /**
+     * 构建提交预约的面板
+     * @return 配置好的提交面板
+     */
     private JPanel buildSubmitPanel() {
+        // 创建主面板，使用边界布局，设置组件间的水平和垂直间距为8像素
         JPanel panel = new JPanel(new BorderLayout(8, 8));
 
         // 表单区域 - 使用 FlowLayout 确保标签和输入框在同一行
@@ -135,7 +159,7 @@ public class StaffFrame extends JFrame {
         staffPanel.add(controlPanel, BorderLayout.NORTH);
         staffPanel.add(scrollStaff, BorderLayout.CENTER);
 
-        // 操作按钮区域 - 保持不变
+        // 操作按钮区域
         JButton btnSubmit = new JButton("提交预约");
         JButton btnReloadRoom = new JButton("刷新会议室");
         JButton btnReloadStaff = new JButton("刷新人员");
@@ -144,7 +168,7 @@ public class StaffFrame extends JFrame {
         op.add(btnReloadStaff);
         op.add(btnSubmit);
 
-        // 事件监听 - 保持不变
+        // 事件监听
         btnReloadRoom.addActionListener(e -> loadRoomOptions());
         btnReloadStaff.addActionListener(e -> refreshStaffCheckList());
         btnSubmit.addActionListener(e -> addReservation());
@@ -167,27 +191,46 @@ public class StaffFrame extends JFrame {
 
 
     // 刷新员工复选框列表
+    /**
+     * 刷新员工复选框列表
+     * 该方法会清空现有的复选框列表，然后从数据库中获取当前部门的员工信息，
+     * 为每个员工创建一个复选框，并添加到界面上
+     */
     private void refreshStaffCheckList() {
+        // 清空员工复选框列表和界面上的复选框面板
         staffCheckBoxes.clear();
         checkboxPanel.removeAll();
+        // 创建员工数据访问对象，获取当前部门的员工列表
         StaffDAO dao = new StaffDAO();
         List<StaffInfo> staffList = dao.getStaffByDept(user.getDeptId());
+        // 遍历员工列表，为每个员工创建复选框
         for (StaffInfo s : staffList) {
+            // 创建复选框，显示员工姓名和工号
             JCheckBox cb = new JCheckBox(s.getStaffName() + " (" + s.getStaffNo() + ")");
+            // 将员工ID存储在复选框的客户端属性中，方便后续获取
             cb.putClientProperty("staffId", s.getStaffId());
+            // 添加动作监听器，当复选框状态改变时更新选中数量
             cb.addActionListener(e -> updateSelectedCount());
+            // 将复选框添加到列表和面板中
             staffCheckBoxes.add(cb);
             checkboxPanel.add(cb);
+            // 如果是当前登录员工，则默认选中该复选框
             if (s.getStaffId() == user.getStaffId()) {
                 cb.setSelected(true);
             }
         }
+        // 重新验证和重绘画布，确保界面更新
         checkboxPanel.revalidate();
         checkboxPanel.repaint();
+        // 更新已选择的员工数量显示
         updateSelectedCount();
     }
 
     // 更新已选人数显示
+    /**
+     * 更新已选人数和总人数的显示
+     * 该方法会遍历所有员工复选框，统计被选中的数量，并更新界面上的标签显示
+     */
     private void updateSelectedCount() {
         // 计算已选人数
         long count = staffCheckBoxes.stream().filter(JCheckBox::isSelected).count();
@@ -198,69 +241,112 @@ public class StaffFrame extends JFrame {
     }
 
     // -------------------- 我的预约面板 --------------------
+    /**
+     * 构建用户界面面板
+     * @return 配置好的JPanel面板，包含操作按钮和表格
+     */
     private JPanel buildMyPanel() {
+        // 创建使用BorderLayout布局的面板，组件间水平和垂直间距为8像素
         JPanel panel = new JPanel(new BorderLayout(8,8));
+        // 创建基于myModel数据模型的表格，并设置行高为28像素
         JTable table = new JTable(myModel);
         table.setRowHeight(28);
 
+        // 创建"刷新"和"撤销选中预约"按钮
         JButton btnRefresh = new JButton("刷新");
         JButton btnCancel = new JButton("撤销选中预约");
+        // 创建使用右对齐FlowLayout布局的操作面板
         JPanel op = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // 将按钮添加到操作面板
         op.add(btnRefresh); op.add(btnCancel);
 
+        // 为刷新按钮添加动作监听器，点击时加载用户预约信息
         btnRefresh.addActionListener(e -> loadMyReservations());
+        // 为撤销按钮添加动作监听器
         btnCancel.addActionListener(e -> {
+            // 获取用户选中的表格行
             int row = table.getSelectedRow();
+            // 如果没有选中任何行，提示用户并返回
             if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一条记录"); return; }
+            // 获取选中行的预约ID
             long reservationId = Long.parseLong(myModel.getValueAt(row, 0).toString());
+            // 调用ReservationDAO取消预约，传入预约ID和员工ID
             boolean ok = new ReservationDAO().cancelReservation(reservationId, user.getStaffId());
+            // 显示操作结果提示
             JOptionPane.showMessageDialog(this, ok ? "撤销成功" : "撤销失败（仅待确认可撤销）");
+            // 重新加载预约信息
             loadMyReservations();
         });
 
+        // 将操作面板添加到面板的北部（顶部）
         panel.add(op, BorderLayout.NORTH);
+        // 将表格添加到面板的中央，并添加滚动条支持
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
     }
 
     // -------------------- 空闲查询面板 --------------------
+    /**
+     * 构建一个显示空闲房间的面板
+     * @return JPanel 配置好的空闲房间面板
+     */
     private JPanel buildFreePanel() {
+        // 创建使用BorderLayout布局的面板，设置水平和垂直间距为8
         JPanel panel = new JPanel(new BorderLayout(8,8));
+        // 创建表格并设置数据模型，同时设置行高为28像素
         JTable table = new JTable(freeModel);
         table.setRowHeight(28);
 
+        // 创建日期输入框，并设置为当前日期
         JTextField tfDate = new JTextField(10);
         tfDate.setText(java.time.LocalDate.now().toString());
 
+        // 创建查询按钮
         JButton btnQuery = new JButton("按日期查询");
+        // 创建顶部面板，使用FlowLayout左对齐布局
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // 向顶部面板添加日期标签、输入框和查询按钮
         top.add(new JLabel("日期(yyyy-MM-dd)"));
         top.add(tfDate);
         top.add(btnQuery);
 
+        // 为查询按钮添加事件监听器
         btnQuery.addActionListener(e -> {
+            // 清空表格数据
             freeModel.setRowCount(0);
+            // 调用DAO查询指定日期的空闲房间信息
             List<String[]> list = new RoomAvailabilityDAO().queryByDate(tfDate.getText().trim());
+            // 将查询结果逐行添加到表格模型中
             for (String[] x : list) freeModel.addRow(x);
         });
 
+        // 将顶部面板添加到主面板的北部，将带滚动条的表格添加到中心区域
         panel.add(top, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
     }
 
     // -------------------- 签到管理面板 --------------------
+    /**
+     * 构建签到面板
+     * @return 返回一个包含会议签到相关控件的JPanel面板
+     */
     private JPanel buildSignPanel() {
+        // 创建使用BorderLayout布局的面板，设置组件之间的水平和垂直间距为8像素
         JPanel panel = new JPanel(new BorderLayout(8,8));
 
+        // 创建使用FlowLayout布局的面板，设置左对齐和组件间距
         JPanel queryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        // 创建下拉框用于选择会议
         JComboBox<String> cbReservation = new JComboBox<>();
 
+        // 创建各个功能按钮
         JButton btnLoadParticipants = new JButton("加载参会人员");
         JButton btnSignDepartment = new JButton("部门签到");
         JButton btnRefresh = new JButton("刷新会议列表");
         JButton btnSignSelected = new JButton("签到选中记录");
 
+        // 向查询面板添加组件
         queryPanel.add(new JLabel("选择会议"));
         queryPanel.add(cbReservation);
         queryPanel.add(btnLoadParticipants);
@@ -268,6 +354,7 @@ public class StaffFrame extends JFrame {
         queryPanel.add(btnRefresh);
         queryPanel.add(btnSignSelected);
 
+        // 创建表格显示参会人员信息，并设置行高
         JTable table = new JTable(signModel);
         table.setRowHeight(28);
 
@@ -368,25 +455,40 @@ public class StaffFrame extends JFrame {
     }
 
     // -------------------- 辅助方法 --------------------
+    /**
+     * 加载会议室选项的下拉列表
+     * 该方法会清除现有的所有选项，然后从数据库中获取最新的会议室列表并添加到下拉框中
+     */
     private void loadRoomOptions() {
+        // 清空下拉框中的所有现有选项
         cbRoom.removeAllItems();
+        // 通过MeetingRoomDAO从数据库获取所有可用的会议室选项列表
         List<String> opts = new MeetingRoomDAO().roomOption();
+        // 遍历列表中的每个选项，并添加到下拉框中
         for (String s : opts) cbRoom.addItem(s);
     }
 
+    /**
+     * 添加会议室预约的方法
+     * 该方法负责收集用户输入的预约信息，进行多项校验，然后提交预约数据
+     */
     private void addReservation() {
         try {
-            // 1. 解析会议室
+            // 1. 解析会议室信息
+            // 从下拉框中获取选中的会议室文本
             String roomText = (String) cbRoom.getSelectedItem();
+            // 检查是否选择了会议室
             if (roomText == null || roomText.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "请先选择会议室");
                 return;
             }
+            // 使用正则表达式提取会议室ID
             Matcher matcher = Pattern.compile("^(\\d+)").matcher(roomText.trim());
             if (!matcher.find()) {
                 JOptionPane.showMessageDialog(this, "会议室格式异常，请刷新后重试");
                 return;
             }
+            // 将提取的会议室ID转换为长整型
             long roomId = Long.parseLong(matcher.group(1));
 
             // 2. 解析时间
@@ -465,10 +567,19 @@ public class StaffFrame extends JFrame {
         }
     }
 
+    /**
+     * 加载用户预订信息的方法
+     * 从数据库中获取当前用户的预订记录，并将其加载到表格模型中
+     */
     private void loadMyReservations() {
+        // 清空表格中的所有行
         myModel.setRowCount(0);
+        // 从数据库查询当前用户的预订记录
         List<ReservationList> list = new ReservationDAO().searchMyReservation(user.getStaffId());
+        // 遍历预订记录列表，将每条记录添加到表格模型中
         for (ReservationList r : list) {
+            // 向表格模型中添加一行数据，包含预订ID、预订编号、会议主题、
+            // 会议室名称、开始时间、结束时间、参与人数、处理状态和备注信息
             myModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(),
                     r.getRoomName(), r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(), r.getComment()

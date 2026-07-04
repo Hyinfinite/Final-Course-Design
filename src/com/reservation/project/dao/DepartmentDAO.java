@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * DepartmentDAO类，用于处理部门相关的数据库操作
  * 包括查询所有部门、添加部门、更新部门和删除部门等功能
@@ -15,7 +16,7 @@ public class DepartmentDAO {
 
     /**
      * 查询所有部门信息
-     * @return 返回包含所有部门信息的List集合
+     * @return 返回包含所有部门信息的列表，如果没有部门则返回空列表
      */
     public List<Department> listAll() {
         // 初始化部门列表
@@ -51,10 +52,11 @@ public class DepartmentDAO {
         return list;
     }
 
+
     /**
      * 添加新部门
      * @param deptName 部门名称
-     * @return 添加成功返回true，失败返回false
+     * @return 添加成功返回true，如果部门名称已存在或其他错误则返回false
      */
     public boolean addDepartment(String deptName) {
         // 定义SQL插入语句
@@ -84,11 +86,12 @@ public class DepartmentDAO {
         }
     }
 
+
     /**
      * 更新部门信息
      * @param deptId 部门ID
      * @param deptName 新的部门名称
-     * @return 更新成功返回true，失败返回false
+     * @return 更新成功返回true，如果部门名称已存在或其他错误则返回false
      */
     public boolean updateDepartment(long deptId, String deptName) {
         // 定义SQL更新语句
@@ -119,10 +122,11 @@ public class DepartmentDAO {
         }
     }
 
+
     /**
      * 删除部门
      * @param deptId 要删除的部门ID
-     * @return 删除成功返回true，失败返回false
+     * @return 删除成功返回true，如果存在外键约束或其他错误则返回false
      */
     public boolean deleteDepartment(long deptId) {
         // 定义SQL删除语句

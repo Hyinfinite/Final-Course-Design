@@ -7,7 +7,8 @@ import java.util.List;
 import java.sql.*;
 
 /**
- * 会议房间数据访问对象，用于处理与会议房间相关的数据库操作
+ * MeetingRoomDAO类，用于处理会议室相关的数据库操作
+ * 包括获取所有会议室的选项信息、根据房间ID获取房间的容纳人数等功能
  */
 public class MeetingRoomDAO {
     /**
@@ -20,9 +21,9 @@ public class MeetingRoomDAO {
         // SQL查询语句，获取所有房间的ID、名称和容量，并按ID排序
         String sql = "SELECT room_id, room_name, capacity FROM meeting_room ORDER BY room_id";
         // 声明数据库连接和操作对象
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        Connection con = null;  // 数据库连接对象
+        PreparedStatement ps = null;  // 预处理语句对象
+        ResultSet rs = null;  // 结果集对象
         try {
             // 获取数据库连接
             con = SqlUtil.getConnection();
@@ -32,9 +33,9 @@ public class MeetingRoomDAO {
             rs = ps.executeQuery();
             // 遍历结果集，将每个房间的信息添加到列表中
             while (rs.next()) {
-                long id = rs.getLong("room_id");
-                String name = rs.getString("room_name");
-                int capacity = rs.getInt("capacity");
+                long id = rs.getLong("room_id");  // 获取房间ID
+                String name = rs.getString("room_name");  // 获取房间名称
+                int capacity = rs.getInt("capacity");  // 获取房间容量
                 // 格式化房间信息并添加到列表
                 Room.add(id + " " + name + "(可容纳人数: " + capacity + ")");
             }
@@ -58,9 +59,9 @@ public class MeetingRoomDAO {
         // SQL查询语句，根据房间ID获取容量
         String sql = "SELECT capacity FROM meeting_room WHERE room_id = ?";
         // 声明数据库连接和操作对象
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        Connection con = null;  // 数据库连接对象
+        PreparedStatement ps = null;  // 预处理语句对象
+        ResultSet rs = null;  // 结果集对象
         try {
             // 获取数据库连接
             con = SqlUtil.getConnection();
@@ -72,7 +73,7 @@ public class MeetingRoomDAO {
             rs = ps.executeQuery();
             // 如果查询结果有下一行，返回容量值
             if (rs.next()) {
-                return rs.getInt("capacity");
+                return rs.getInt("capacity");  // 获取并返回房间容量
             }
         } catch (Exception e) {
             // 打印异常信息

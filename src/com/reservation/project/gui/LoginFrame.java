@@ -73,6 +73,10 @@ public class LoginFrame extends JFrame {
 
     /**
      * 处理登录逻辑的方法
+     * 1. 获取用户输入的工号、密码和角色
+     * 2. 验证输入是否为空
+     * 3. 调用UserDAO的Login方法进行用户验证
+     * 4. 根据验证结果和用户角色打开相应的界面
      */
     private void doLogin() {
         // 获取并去除工号和密码的前后空格

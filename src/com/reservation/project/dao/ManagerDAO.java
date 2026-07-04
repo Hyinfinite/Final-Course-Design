@@ -7,21 +7,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
- * 会议室管理员扩展：已处理记录查询
- * 该类用于实现会议室管理系统中管理员查询已处理预约记录的功能
+ * 管理员数据访问对象类，用于处理与管理员相关的数据库操作
  */
 public class ManagerDAO {
 
     /**
      * 查询所有已处理的预约记录
-     * 已处理状态包括：已确认、已驳回、已取消
-     * @return 返回已处理预约记录的列表，每个记录包含预约ID、预约编号、会议主题、会议室名称、开始时间、结束时间、处理状态和申请人姓名等信息
+     * @return 已处理预约记录的列表，包含预约详情、会议室信息、申请人信息等
      */
     public List<ReservationList> searchProcessedReservation () {
-        // 初始化结果列表
+        // 初始化结果列表，用于存储查询到的预约记录
         List<ReservationList> list = new ArrayList<ReservationList>();
         // SQL查询语句，用于获取已处理的预约记录及其相关信息
+        // 包括预约ID、预约编号、会议主题、会议室名称、开始时间、结束时间、处理状态、申请人姓名、确认备注和参与人数
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
                 "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
                 "FROM reservation r " +
@@ -61,10 +61,10 @@ public class ManagerDAO {
                 list.add(r);
             }
         } catch (Exception e) {
-            // 打印异常堆栈信息
+            // 打印异常堆栈信息，用于调试和错误追踪
             e.printStackTrace();
         } finally {
-            // 关闭所有数据库资源
+            // 关闭所有数据库资源，包括连接、预处理语句和结果集，防止资源泄漏
             SqlUtil.closeAll(con, ps, rs);
         }
         // 返回结果列表

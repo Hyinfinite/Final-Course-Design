@@ -16,10 +16,10 @@ import java.util.List;
  * 继承自JFrame，实现了基本的窗口界面功能
  */
 public class ManagerFrame extends JFrame {
-    /** 当前登录的用户对象，用于获取用户信息和身份验证 */
+    // 当前登录的用户对象，用于获取用户信息和身份验证
     private final User user;
 
-    /** 待确认预约的表格模型，包含ID、预约号、主题、会议室、开始时间、结束时间、状态和申请人等列 */
+    // 待确认预约的表格模型，包含ID、预约号、主题、会议室、开始时间、结束时间、状态和申请人等列
     private DefaultTableModel pendingModel = new DefaultTableModel(
             new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","申请人","审批意见"}, 0) {
         @Override
@@ -28,7 +28,7 @@ public class ManagerFrame extends JFrame {
         }
     };
 
-    /** 历史记录的表格模型，包含与待确认预约表格相同的列 */
+    // 历史记录的表格模型，包含与待确认预约表格相同的列
     private DefaultTableModel historyModel = new DefaultTableModel(
             new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","申请人","审批意见"}, 0) {
         @Override
