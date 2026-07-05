@@ -39,19 +39,28 @@ public class StaffFrame extends JFrame {
     // 我的预约表格
     private DefaultTableModel myModel = new DefaultTableModel(
             new Object[]{"ID","预约号","主题","会议室","开始","结束","参会人数","状态","审批意见"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     // 空闲查询表格
     private DefaultTableModel freeModel = new DefaultTableModel(
             new Object[]{"会议室ID","会议室","位置","容量","状态"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     // 签到管理表格
     private DefaultTableModel signModel = new DefaultTableModel(
             new Object[]{"记录ID","预约号","主题","开始时间","结束时间","参会人工号","参会人","签到状态","签到时间"}, 0) {
-        @Override public boolean isCellEditable(int r, int c) { return false; }
+        @Override
+        public boolean isCellEditable(int r, int c) {
+            return false;
+        }
     };
 
     /**
@@ -169,28 +178,36 @@ public class StaffFrame extends JFrame {
         op.add(btnSubmit);
 
         // 事件监听
+
+        // btnReloadRoom按钮点击时调用loadRoomOptions方法加载房间选项
         btnReloadRoom.addActionListener(e -> loadRoomOptions());
+        // btnReloadStaff按钮点击时调用refreshStaffCheckList方法刷新员工清单
         btnReloadStaff.addActionListener(e -> refreshStaffCheckList());
+        // btnSubmit按钮点击时调用addReservation方法添加预订
         btnSubmit.addActionListener(e -> addReservation());
 
+        // 为全选和取消全选按钮添加事件监听器
+        // btnSelectAll按钮点击时，将所有员工复选框设置为选中状态，并更新选中计数
         btnSelectAll.addActionListener(e -> {
             staffCheckBoxes.forEach(cb -> cb.setSelected(true));
             updateSelectedCount();
         });
+        // btnDeselectAll按钮点击时，将所有员工复选框设置为未选中状态，并更新选中计数
         btnDeselectAll.addActionListener(e -> {
             staffCheckBoxes.forEach(cb -> cb.setSelected(false));
             updateSelectedCount();
         });
 
+        // 将各个面板添加到主面板中，并使用边界布局(BorderLayout)进行排列
         panel.add(form, BorderLayout.NORTH);
         panel.add(staffPanel, BorderLayout.CENTER);
         panel.add(op, BorderLayout.SOUTH);
+        // 返回组装完成的主面板
         return panel;
     }
 
 
 
-    // 刷新员工复选框列表
     /**
      * 刷新员工复选框列表
      * 该方法会清空现有的复选框列表，然后从数据库中获取当前部门的员工信息，
@@ -358,61 +375,76 @@ public class StaffFrame extends JFrame {
         JTable table = new JTable(signModel);
         table.setRowHeight(28);
 
-        // 加载会议列表
+        // 加载指定部门的所有已确认会议
         Runnable loadReservations = () -> {
             cbReservation.removeAllItems();
-            signModel.setRowCount(0);
-            List<ReservationList> list = new ReservationDAO().searchConfirmedReservationsByDept(user.getDeptId());
+            signModel.setRowCount(0);  // 清空表格数据
+            List<ReservationList> list = new ReservationDAO().searchConfirmedReservationsByDept(user.getDeptId());  // 获取部门已开始会议列表
             if (list.isEmpty()) {
-                cbReservation.addItem("暂无已开始会议");
+                cbReservation.addItem("暂无已开始会议");  // 如果没有会议，则显示"暂无已开始会议"
             } else {
                 for (ReservationList r : list) {
                     String display = r.getReservationId() + " - " + r.getMeetingTopic()
-                            + " (" + r.getStartTime() + ")";
+                            + " (" + r.getStartTime() + ")";  // 将会议信息格式化后添加到下拉框中（会议ID - 会议主题 (开始时间)）
                     cbReservation.addItem(display);
                 }
             }
         };
 
-        // 加载参会人员
+
+        // 为加载参会人员按钮添加动作监听器
         btnLoadParticipants.addActionListener(e -> {
+            // 清空表格数据模型中的所有行
             signModel.setRowCount(0);
+            // 获取当前选中的会议预订项
             String selected = (String) cbReservation.getSelectedItem();
+            // 检查是否选择了有效的会议
             if (selected == null || selected.startsWith("暂无")) {
+                // 如果没有选择有效会议，显示提示信息并返回
                 JOptionPane.showMessageDialog(this, "请先选择有效的会议");
                 return;
             }
             try {
+                // 从选中的会议项中提取会议ID
                 long rid = Long.parseLong(selected.split(" - ")[0]);
+                // 通过会议ID获取参会人员列表
                 List<Participant> list = new ParticipantDAO().listParticipantsByReservation(rid);
+                // 检查参会人员列表是否为空
                 if (list.isEmpty()) {
+                    // 如果没有参会人员，显示提示信息
                     JOptionPane.showMessageDialog(this, "该会议暂无参会人员");
                 }
+                // 遍历参会人员列表，将每个参会人员的信息添加到表格模型中
                 for (Participant p : list) {
                     signModel.addRow(new Object[]{
-                            p.getParticipantId(),
-                            p.getReservationNo(),
-                            p.getMeetingTopic(),
-                            p.getStartTime(),
-                            p.getEndTime(),
-                            p.getParticipantStaffNo(),
-                            p.getParticipantName(),
-                            p.getSignInProcess(),
-                            p.getSignInTime()
+                            p.getParticipantId(),           // 参会人员ID
+                            p.getReservationNo(),           // 预订号
+                            p.getMeetingTopic(),            // 会议主题
+                            p.getStartTime(),               // 开始时间
+                            p.getEndTime(),                 // 结束时间
+                            p.getParticipantStaffNo(),      // 参会员工号
+                            p.getParticipantName(),         // 参会人员姓名
+                            p.getSignInProcess(),           // 签到流程
+                            p.getSignInTime()               // 签到时间
                     });
                 }
             } catch (Exception ex) {
+                // 处理可能出现的异常，并显示错误信息
                 JOptionPane.showMessageDialog(this, "加载失败：" + ex.getMessage());
             }
         });
 
-        // 部门签到：签到该会议所有参会人员（已勾选的人员）
+
+        // 为部门签到按钮添加动作监听器
         btnSignDepartment.addActionListener(e -> {
+            // 获取当前选中的会议项
             String selected = (String) cbReservation.getSelectedItem();
+            // 检查是否选中了有效会议
             if (selected == null || selected.startsWith("暂无")) {
                 JOptionPane.showMessageDialog(this, "请先选择有效的会议");
                 return;
             }
+            // 从选中项中解析出会议ID
             long rid = Long.parseLong(selected.split(" - ")[0]);
 
             // 检查当前用户是否为会议申请人
@@ -421,33 +453,45 @@ public class StaffFrame extends JFrame {
                 return;
             }
 
+            // 执行部门签到操作，获取签到人数
             int count = new ParticipantDAO().signInAllParticipants(rid);
+            // 显示签到成功提示信息
             JOptionPane.showMessageDialog(this, "部门签到成功，已签到 " + count + " 人");
+            // 刷新参会人员列表
             btnLoadParticipants.doClick();
         });
 
-        // 单条签到
+
+        // 为签到按钮添加动作监听器
         btnSignSelected.addActionListener(e -> {
+            // 获取当前选中的表格行索引
             int row = table.getSelectedRow();
+            // 如果没有选中任何行，提示用户并返回
             if (row < 0) {
                 JOptionPane.showMessageDialog(this, "请先选中一条记录");
                 return;
             }
+            // 获取选中行的第一列（ID列）的值
             Object idObj = signModel.getValueAt(row, 0);
+            // 检查ID是否为空或为空字符串
             if (idObj == null || idObj.toString().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "所选记录无效，请重新加载参会人员");
                 return;
             }
+            // 将ID转换为长整型
             long participantId = Long.parseLong(idObj.toString());
+            // 调用DAO方法执行签到操作，传入参会者ID和当前用户ID
             boolean ok = new ParticipantDAO().signIn(participantId, user.getStaffId());
+            // 根据签到结果显示相应消息
             JOptionPane.showMessageDialog(this, ok ? "签到成功" : "签到失败（可能已签到、会议未开始或无权限）");
+            // 重新加载参会人员列表
             btnLoadParticipants.doClick();
         });
 
 
+        // 为刷新按钮添加动作监听器
         btnRefresh.addActionListener(e -> loadReservations.run());
-
-        loadReservations.run();
+        loadReservations.run();  // 加载预订信息
 
         panel.add(queryPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
@@ -465,7 +509,9 @@ public class StaffFrame extends JFrame {
         // 通过MeetingRoomDAO从数据库获取所有可用的会议室选项列表
         List<String> opts = new MeetingRoomDAO().roomOption();
         // 遍历列表中的每个选项，并添加到下拉框中
-        for (String s : opts) cbRoom.addItem(s);
+        for (String s : opts) {
+            cbRoom.addItem(s);
+        }
     }
 
     /**

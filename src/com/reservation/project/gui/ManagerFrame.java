@@ -131,17 +131,26 @@ public class ManagerFrame extends JFrame {
      * @return 配置好的历史记录面板
      */
     private JPanel buildHistoryPanel() {
+        // 创建一个使用BorderLayout布局的面板，设置水平和垂直间距为8像素
         JPanel p = new JPanel(new BorderLayout(8,8));
+        // 创建一个使用historyModel作为数据模型的表格，并设置行高为28像素
         JTable table = new JTable(historyModel);
         table.setRowHeight(28);
 
+        // 创建一个"刷新历史"按钮
         JButton btnRefresh = new JButton("刷新历史");
+        // 创建一个使用FlowLayout(左对齐)的面板用于放置操作按钮
         JPanel op = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // 将刷新按钮添加到操作面板中
         op.add(btnRefresh);
+        // 为刷新按钮添加点击事件监听器，点击时调用loadHistory方法
         btnRefresh.addActionListener(e -> loadHistory());
 
+        // 将操作面板添加到历史记录面板的北部(上方)
         p.add(op, BorderLayout.NORTH);
+        // 将表格添加到带滚动面板的容器中，并放置在历史记录面板的中央
         p.add(new JScrollPane(table), BorderLayout.CENTER);
+        // 返回配置好的历史记录面板
         return p;
     }
 
@@ -152,16 +161,22 @@ public class ManagerFrame extends JFrame {
      * @param comment 处理意见
      */
     private void processSelected(JTable table, String process, String comment) {
+        // 获取用户选中的表格行号
         int row = table.getSelectedRow();
+        // 如果没有选中任何行，提示用户并返回
         if (row < 0) {
             JOptionPane.showMessageDialog(this, "请先选中一条待处理记录");
             return;
         }
 
+        // 从表格中获取预约ID，并转换为Long类型
         long reservationId = Long.parseLong(pendingModel.getValueAt(row, 0).toString());
+        // 调用ReservationDAO处理预约，传入预约ID、员工ID、处理结果和处理意见
         boolean ok = new ReservationDAO().processReservation(reservationId, user.getStaffId(), process, comment);
+        // 根据处理结果显示成功或失败的提示信息
         JOptionPane.showMessageDialog(this, ok ? "处理成功" : "处理失败");
 
+        // 如果处理成功，重新加载待确认预约和历史记录
         if (ok) {
             loadPending();  // 重新加载待确认预约
             loadHistory();  // 重新加载历史记录
@@ -172,10 +187,13 @@ public class ManagerFrame extends JFrame {
      * 加载待确认预约数据
      * 从数据库查询待处理的预约记录并更新到表格模型中
      */
-    private void loadPending() {
-        pendingModel.setRowCount(0);  // 清空表格数据
-        List<ReservationList> list = new ReservationDAO().searchPendingReservation();
+    private void loadPending() {  // 私有方法，用于加载待确认的预约数据
+        pendingModel.setRowCount(0);  // 清空表格数据，为加载新数据做准备
+        List<ReservationList> list = new ReservationDAO().searchPendingReservation();  // 调用数据访问对象获取待处理预约列表
+        // 遍历预约列表，将每条预约信息添加到表格模型中
         for (ReservationList r : list) {
+            // 向表格模型中添加一行数据，包含预约ID、预约编号、会议主题、会议室名称、
+            // 开始时间、结束时间、参与人数、处理状态、申请人姓名和备注信息
             pendingModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                     r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(),
@@ -189,9 +207,13 @@ public class ManagerFrame extends JFrame {
      * 从数据库查询已处理的预约记录并更新到表格模型中
      */
     private void loadHistory() {
+        // 清空表格数据，为加载新数据做准备
         historyModel.setRowCount(0);  // 清空表格数据
+        // 通过ManagerDAO从数据库查询已处理的预约记录
         List<ReservationList> list = new ManagerDAO().searchProcessedReservation();
+        // 遍历查询结果，将每条预约记录添加到表格模型中
         for (ReservationList r : list) {
+            // 向表格模型中添加一行数据，包含预约的各种信息
             historyModel.addRow(new Object[]{
                     r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                     r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(),

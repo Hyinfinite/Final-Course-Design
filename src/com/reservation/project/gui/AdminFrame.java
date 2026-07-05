@@ -101,27 +101,41 @@ public class AdminFrame extends JFrame {
         // 按钮事件监听器
         btnAdd.addActionListener(e -> {
             String name = tfName.getText().trim();
-            if (name.isEmpty()) { JOptionPane.showMessageDialog(this, "部门名称不能为空"); return; }
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "部门名称不能为空");
+                return;
+            }
             JOptionPane.showMessageDialog(this, dao.addDepartment(name) ? "新增成功" : "新增失败（可能重名）");
             load.run(); // 刷新表格
         });
 
         btnUpd.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一行");
+                return;
+            }
             long id = Long.parseLong(model.getValueAt(row, 0).toString());
             String name = tfName.getText().trim();
-            if (name.isEmpty()) { JOptionPane.showMessageDialog(this, "请输入新部门名称"); return; }
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "请输入新部门名称");
+                return;
+            }
             JOptionPane.showMessageDialog(this, dao.updateDepartment(id, name) ? "修改成功" : "修改失败");
             load.run(); // 刷新表格
         });
 
         btnDel.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一行");
+                return;
+            }
             long id = Long.parseLong(model.getValueAt(row, 0).toString());
             int ok = JOptionPane.showConfirmDialog(this, "确认删除该部门？", "确认", JOptionPane.YES_NO_OPTION);
-            if (ok != JOptionPane.YES_OPTION) return;
+            if (ok != JOptionPane.YES_OPTION) {
+                return;
+            }
             JOptionPane.showMessageDialog(this, dao.deleteDepartment(id) ? "删除成功" : "删除失败（可能被人员/预约引用）");
             load.run(); // 刷新表格
         });
@@ -131,7 +145,9 @@ public class AdminFrame extends JFrame {
         // 表格选择监听器，当选中一行时，将部门名称显示在输入框中
         table.getSelectionModel().addListSelectionListener(e -> {
             int row = table.getSelectedRow();
-            if (row >= 0) tfName.setText(String.valueOf(model.getValueAt(row, 1)));
+            if (row >= 0) {
+                tfName.setText(String.valueOf(model.getValueAt(row, 1)));
+            }
         });
 
         // 添加组件到面板
@@ -159,7 +175,10 @@ public class AdminFrame extends JFrame {
         // 表格包含ID、编号、名称、位置、容量、投影仪、音响等列，且不可编辑
         DefaultTableModel model = new DefaultTableModel(
                 new Object[]{"ID","编号","名称","位置","容量","投影仪","音响"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable table = new JTable(model);
         table.setRowHeight(28);
@@ -201,48 +220,80 @@ public class AdminFrame extends JFrame {
             }
         };
 
-        // 按钮事件监听器
+        // 为添加按钮添加动作监听器
         btnAdd.addActionListener(e -> {
             try {
-                String code = tfCode.getText().trim();
-                String name = tfName.getText().trim();
-                String loc = tfLoc.getText().trim();
-                int cap = Integer.parseInt(tfCap.getText().trim());
+                // 获取并去除文本框中的前后空格
+                String code = tfCode.getText().trim();    // 获取房间编号
+                String name = tfName.getText().trim();    // 获取房间名称
+                String loc = tfLoc.getText().trim();      // 获取房间位置
+                int cap = Integer.parseInt(tfCap.getText().trim());  // 获取房间容量并转换为整数
+                // 验证输入数据的有效性
                 if (code.isEmpty() || name.isEmpty() || cap <= 0) {
+                    // 如果编号或名称为空，或者容量小于等于0，显示错误提示
                     JOptionPane.showMessageDialog(this, "编号/名称不能为空，容量>0");
-                    return;
+                    return;  // 终止执行
                 }
-                boolean ok = dao.addRoom(code, name, loc, cap, cbProj.isSelected()?1:0, cbAudio.isSelected()?1:0);
+                // 调用数据访问对象添加房间信息
+                // 检查项目设备和音频设备是否选中，选中则值为1，否则为0
+                boolean ok = dao.addRoom(code, name, loc, cap, cbProj.isSelected() ? 1 : 0, cbAudio.isSelected() ? 1 : 0);
+                // 根据添加结果显示相应的成功或失败提示
                 JOptionPane.showMessageDialog(this, ok ? "新增成功" : "新增失败（编号可能重复）");
-                load.run(); // 刷新表格
+                load.run(); // 刷新表格数据
             } catch (Exception ex) {
+                // 如果容量输入的不是有效数字，显示错误提示
                 JOptionPane.showMessageDialog(this, "容量必须是数字");
             }
         });
 
+        // 为更新按钮添加动作监听器
         btnUpd.addActionListener(e -> {
+            // 获取当前选中行的索引
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
+            // 检查是否选中了行
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一行");
+                return;
+            }
             try {
+                // 获取选中行的ID
                 long id = Long.parseLong(model.getValueAt(row, 0).toString());
-                String code = tfCode.getText().trim();
-                String name = tfName.getText().trim();
-                String loc = tfLoc.getText().trim();
-                int cap = Integer.parseInt(tfCap.getText().trim());
-                boolean ok = dao.updateRoom(id, code, name, loc, cap, cbProj.isSelected()?1:0, cbAudio.isSelected()?1:0);
+
+                // 获取并处理输入框中的文本信息
+                String code = tfCode.getText().trim();  // 获取编号并去除前后空格
+                String name = tfName.getText().trim();  // 获取名称并去除前后空格
+                String loc = tfLoc.getText().trim();    // 获取位置并去除前后空格
+                int cap = Integer.parseInt(tfCap.getText().trim());  // 获取容量并转换为整数
+                // 更新房间信息，包括编号、名称、位置、容量以及是否配备投影设备和音响设备
+                boolean ok = dao.updateRoom(id, code, name, loc, cap, cbProj.isSelected() ? 1 : 0, cbAudio.isSelected() ? 1 : 0);
+                // 显示操作结果
                 JOptionPane.showMessageDialog(this, ok ? "修改成功" : "修改失败");
-                load.run(); // 刷新表格
+                load.run(); // 刷新表格数据
             } catch (Exception ex) {
+                // 捕获异常并提示用户输入不合法
                 JOptionPane.showMessageDialog(this, "输入不合法");
             }
         });
 
+        // 删除按钮的事件监听器
         btnDel.addActionListener(e -> {
+            // 获取当前选中的行索引
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
+            // 如果没有选中任何行，提示用户并返回
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一行");
+                return;
+            }
+            // 获取选中行的第一列值（ID），并转换为Long类型
             long id = Long.parseLong(model.getValueAt(row, 0).toString());
+            // 弹出确认对话框，让用户确认是否删除
             int ok = JOptionPane.showConfirmDialog(this, "确认删除该会议室？", "确认", JOptionPane.YES_NO_OPTION);
-            if (ok != JOptionPane.YES_OPTION) return;
+            // 如果用户点击了"否"，则直接返回
+            if (ok != JOptionPane.YES_OPTION) {
+                return;
+            }
+            // 执行删除操作，并根据结果显示成功或失败信息
+            // 删除失败可能是因为该会议室被预约引用了
             JOptionPane.showMessageDialog(this, dao.deleteRoom(id) ? "删除成功" : "删除失败（可能被预约引用）");
             load.run(); // 刷新表格
         });
@@ -288,7 +339,10 @@ public class AdminFrame extends JFrame {
         // 表格包含ID、工号、姓名、部门ID、部门、性别、职务、电话、角色等列，且不可编辑
         DefaultTableModel model = new DefaultTableModel(
                 new Object[]{"ID","工号","姓名","部门ID","部门","性别","职务","电话","角色"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable table = new JTable(model);
         table.setRowHeight(28);
@@ -334,40 +388,56 @@ public class AdminFrame extends JFrame {
             }
         };
 
+        // 为添加按钮添加动作监听器
         btnAdd.addActionListener(e -> {
             try {
-                String no = tfNo.getText().trim();
-                String name = tfName.getText().trim();
-                long deptId = Long.parseLong(tfDept.getText().trim());
-                String gender = tfGender.getText().trim();
-                String pos = tfPos.getText().trim();
-                String phone = tfPhone.getText().trim();
-                String role = String.valueOf(cbRole.getSelectedItem());
+                // 获取并清理输入框中的文本
+                String no = tfNo.getText().trim();      // 获取工号
+                String name = tfName.getText().trim();  // 获取姓名
+                long deptId = Long.parseLong(tfDept.getText().trim());  // 获取并转换部门ID
+                String gender = tfGender.getText().trim();  // 获取性别
+                String pos = tfPos.getText().trim();    // 获取职位
+                String phone = tfPhone.getText().trim(); // 获取电话
+                String role = String.valueOf(cbRole.getSelectedItem());  // 获取角色选择
 
+                // 验证工号和姓名是否为空
                 if (no.isEmpty() || name.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "工号和姓名不能为空");
                     return;
                 }
+                // 尝试添加员工信息
                 boolean ok = dao.addStaff(no, name, deptId, gender, pos, phone, role);
+                // 根据添加结果显示相应的提示信息
                 JOptionPane.showMessageDialog(this, ok ? "新增成功（默认密码123456）" : "新增失败（工号重复或部门不存在）");
-                load.run(); // 刷新表格
+                load.run(); // 刷新表格数据
             } catch (Exception ex) {
+                // 捕获并处理输入异常
                 JOptionPane.showMessageDialog(this, "输入不合法");
             }
         });
 
+        // 为更新按钮添加动作监听器
         btnUpd.addActionListener(e -> {
+            // 获取当前选中的表格行索引
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
+            // 如果没有选中任何行，提示用户并返回
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一行");
+                return;
+            }
             try {
+                // 获取选中行第一列的值作为员工ID
                 long staffId = Long.parseLong(model.getValueAt(row, 0).toString());
-                String no = tfNo.getText().trim();
-                String name = tfName.getText().trim();
-                long deptId = Long.parseLong(tfDept.getText().trim());
-                String gender = tfGender.getText().trim();
-                String pos = tfPos.getText().trim();
-                String phone = tfPhone.getText().trim();
+                // 获取并处理各个输入框的文本内容
+                String no = tfNo.getText().trim();      // 员工编号
+                String name = tfName.getText().trim();  // 员工姓名
+                long deptId = Long.parseLong(tfDept.getText().trim()); // 部门ID
+                String gender = tfGender.getText().trim(); // 性别
+                String pos = tfPos.getText().trim();     // 职位
+                String phone = tfPhone.getText().trim(); // 电话
+                // 调用DAO方法更新员工基本信息
                 boolean ok = dao.updateStaffBasic(staffId, no, name, deptId, gender, pos, phone);
+                // 显示操作结果提示
                 JOptionPane.showMessageDialog(this, ok ? "修改成功" : "修改失败");
                 load.run(); // 刷新表格
             } catch (Exception ex) {
@@ -375,21 +445,31 @@ public class AdminFrame extends JFrame {
             }
         });
 
+        // 重置按钮的事件监听器
         btnReset.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
-            long staffId = Long.parseLong(model.getValueAt(row, 0).toString());
-            boolean ok = dao.resetPassword(staffId, "123456");
+            int row = table.getSelectedRow(); // 获取当前选中的行索引
+            if (row < 0) { // 如果没有选中任何行
+                JOptionPane.showMessageDialog(this, "请先选中一行"); // 提示用户先选中一行
+                return; // 提前返回，不执行后续操作
+            }
+            long staffId = Long.parseLong(model.getValueAt(row, 0).toString()); // 获取选中行的第一列值并转换为长整型
+            boolean ok = dao.resetPassword(staffId, "123456"); // 调用DAO方法重置密码为"123456"
+            // 显示重置结果提示信息
             JOptionPane.showMessageDialog(this, ok ? "密码已重置为123456" : "重置失败");
         });
 
+        // 设置管理员按钮的事件监听器
         btnSetManager.addActionListener(e -> {
-            int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一行"); return; }
-            long staffId = Long.parseLong(model.getValueAt(row, 0).toString());
-            boolean ok = dao.setRoomAdmin(staffId);
+            int row = table.getSelectedRow(); // 获取当前选中的行索引
+            if (row < 0) { // 如果没有选中任何行
+                JOptionPane.showMessageDialog(this, "请先选中一行"); // 提示用户先选中一行
+                return; // 提前返回，不执行后续操作
+            }
+            long staffId = Long.parseLong(model.getValueAt(row, 0).toString()); // 获取选中行的第一列值并转换为长整型
+            boolean ok = dao.setRoomAdmin(staffId); // 调用DAO方法设置会议室管理员
+            // 显示设置结果提示信息
             JOptionPane.showMessageDialog(this, ok ? "已设置为会议室管理员" : "设置失败");
-            load.run(); // 刷新表格
+            load.run(); // 刷新表格数据
         });
 
         btnRef.addActionListener(e -> load.run()); // 刷新表格
@@ -455,10 +535,15 @@ public class AdminFrame extends JFrame {
         ReservationQueryDAO dao = new ReservationQueryDAO();
 
         // 数据加载任务，从数据库获取所有预约记录并显示在表格中
+        // 使用Lambda表达式创建一个Runnable任务，用于加载所有预约数据
         Runnable loadAll = () -> {
+            // 清空表格模型中的所有行，为加载数据做准备
             model.setRowCount(0);
+            // 从数据访问对象(DAO)查询所有预约记录，不进行分页
             List<ReservationList> list = dao.queryAll("", 0, 0);
+            // 遍历查询到的预约列表
             for (ReservationList r : list) {
+                // 将每个预约记录的信息添加到表格模型中
                 model.addRow(new Object[]{
                         r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
                         r.getStartTime(), r.getEndTime(), r.getParticipantCount(), r.getProcess(), r.getApplicantName(), r.getComment()
@@ -467,19 +552,32 @@ public class AdminFrame extends JFrame {
         };
 
         // 查询按钮事件监听器
+        // 添加查询按钮的事件监听器
         btnQuery.addActionListener(e -> {
+            // 清空表格数据模型中的所有行
             model.setRowCount(0);
+            // 获取日期输入框的文本并去除前后空格
             String date = tfDate.getText().trim();
+            // 初始化部门ID和会议室ID为0
             long deptId = 0;
             long roomId = 0;
             try {
-                if (!tfDeptId.getText().trim().isEmpty()) deptId = Long.parseLong(tfDeptId.getText().trim());
-                if (!tfRoomId.getText().trim().isEmpty()) roomId = Long.parseLong(tfRoomId.getText().trim());
+                // 如果部门ID输入框不为空，则将其转换为长整型
+                if (!tfDeptId.getText().trim().isEmpty()) {
+                    deptId = Long.parseLong(tfDeptId.getText().trim());
+                }
+                // 如果会议室ID输入框不为空，则将其转换为长整型
+                if (!tfRoomId.getText().trim().isEmpty()) {
+                    roomId = Long.parseLong(tfRoomId.getText().trim());
+                }
             } catch (Exception ex) {
+                // 如果转换失败，弹出错误提示对话框
                 JOptionPane.showMessageDialog(this, "部门ID/会议室ID必须是数字");
-                return;
+                return; // 终止当前操作
             }
+            // 根据条件查询所有预约记录
             List<ReservationList> list = dao.queryAll(date, deptId, roomId);
+            // 遍历查询结果，将每条记录添加到表格模型中
             for (ReservationList r : list) {
                 model.addRow(new Object[]{
                         r.getReservationId(), r.getReservationNO(), r.getMeetingTopic(), r.getRoomName(),
@@ -491,7 +589,9 @@ public class AdminFrame extends JFrame {
 
         // 重置按钮事件监听器，清空输入框并加载所有预约记录
         btnReset.addActionListener(e -> {
-            tfDate.setText(""); tfDeptId.setText(""); tfRoomId.setText("");
+            tfDate.setText("");
+            tfDeptId.setText("");
+            tfRoomId.setText("");
             loadAll.run();
         });
 
@@ -534,7 +634,9 @@ public class AdminFrame extends JFrame {
         // 创建部门会议次数表格模型和表格
         DefaultTableModel deptModel = new DefaultTableModel(
                 new Object[]{"部门ID","部门","会议次数"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable deptTable = new JTable(deptModel);
         deptTable.setRowHeight(26);
@@ -585,59 +687,59 @@ public class AdminFrame extends JFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
         // 创建密码输入框和按钮
-        JPasswordField oldPwd = new JPasswordField(16);
-        JPasswordField newPwd = new JPasswordField(16);
-        JPasswordField confirmPwd = new JPasswordField(16);
-        JButton btnSave = new JButton("保存修改");
+        JPasswordField oldPwd = new JPasswordField(16);  // 旧密码输入框，设置长度为16
+        JPasswordField newPwd = new JPasswordField(16);  // 新密码输入框，设置长度为16
+        JPasswordField confirmPwd = new JPasswordField(16);  // 确认密码输入框，设置长度为16
+        JButton btnSave = new JButton("保存修改");  // 保存修改按钮
 
         // 创建水平面板，用于排列标签和输入框
-        JPanel oldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        oldPanel.add(new JLabel("旧密码"));
-        oldPanel.add(oldPwd);
+        JPanel oldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 旧密码面板
+        oldPanel.add(new JLabel("旧密码"));  // 添加旧密码标签
+        oldPanel.add(oldPwd);  // 添加旧密码输入框
 
-        JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        newPanel.add(new JLabel("新密码"));
-        newPanel.add(newPwd);
+        JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 新密码面板
+        newPanel.add(new JLabel("新密码"));  // 添加新密码标签
+        newPanel.add(newPwd);  // 添加新密码输入框
 
-        JPanel confirmPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        confirmPanel.add(new JLabel("确认新密码"));
-        confirmPanel.add(confirmPwd);
+        JPanel confirmPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 确认密码面板
+        confirmPanel.add(new JLabel("确认新密码"));  // 添加确认密码标签
+        confirmPanel.add(confirmPwd);  // 添加确认密码输入框
 
         // 创建按钮面板，用于居中显示按钮
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));
-        btnPanel.add(btnSave);
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));  // 按钮面板
+        btnPanel.add(btnSave);  // 添加保存按钮
 
         // 将所有组件添加到主面板
-        panel.add(oldPanel);
-        panel.add(newPanel);
-        panel.add(confirmPanel);
-        panel.add(btnPanel);
+        panel.add(oldPanel);  // 添加旧密码面板
+        panel.add(newPanel);  // 添加新密码面板
+        panel.add(confirmPanel);  // 添加确认密码面板
+        panel.add(btnPanel);  // 添加按钮面板
 
         // 创建DAO对象，用于数据库操作
         StaffDAO dao = new StaffDAO();
 
         // 保存修改按钮事件监听器
         btnSave.addActionListener(e -> {
-            String o = new String(oldPwd.getPassword()).trim();
-            String n = new String(newPwd.getPassword()).trim();
-            String cfm = new String(confirmPwd.getPassword()).trim();
+            String o = new String(oldPwd.getPassword()).trim();  // 获取旧密码并去除前后空格
+            String n = new String(newPwd.getPassword()).trim();  // 获取新密码并去除前后空格
+            String cfm = new String(confirmPwd.getPassword()).trim();  // 获取确认密码并去除前后空格
 
             // 验证密码是否为空
             if (o.isEmpty() || n.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "密码不能为空");
+                JOptionPane.showMessageDialog(this, "密码不能为空");  // 显示错误提示
                 return;
             }
             // 验证两次输入的新密码是否一致
             if (!n.equals(cfm)) {
-                JOptionPane.showMessageDialog(this, "两次新密码不一致");
+                JOptionPane.showMessageDialog(this, "两次新密码不一致");  // 显示错误提示
                 return;
             }
 
             // 调用DAO层方法更新密码，并显示结果
-            boolean ok = dao.changePassword(loginUser.getStaffId(), o, n);
-            JOptionPane.showMessageDialog(this, ok ? "修改成功，请重新登录生效" : "修改失败（旧密码错误）");
+            boolean ok = dao.changePassword(loginUser.getStaffId(), o, n);  // 执行密码修改
+            JOptionPane.showMessageDialog(this, ok ? "修改成功，请重新登录生效" : "修改失败（旧密码错误）");  // 显示操作结果
         });
 
-        return panel;
+        return panel;  // 返回构建好的密码修改面板
     }
 }

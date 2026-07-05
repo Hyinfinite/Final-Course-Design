@@ -57,7 +57,7 @@ public class ReservationQueryDAO {
         }
 
         // 按创建时间降序排列，确保最新的预约显示在最前面
-        sql += "ORDER BY r.create_time DESC";
+        sql += "ORDER BY r.created_at DESC";
 
         // 初始化数据库连接对象
         Connection con = null;

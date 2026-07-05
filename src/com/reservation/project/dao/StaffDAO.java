@@ -356,7 +356,7 @@ public class StaffDAO {
         List<StaffInfo> list = new ArrayList<>();
         // 定义SQL查询语句，查询指定部门的员工信息，并按姓名排序
         String sql = "SELECT staff_id, staff_no, staff_name, dept_id, gender, position, phone, access_level " +
-                "FROM admin_staff WHERE dept_id = ? ORDER BY staff_name";
+                "FROM admin_staff WHERE dept_id = ? ORDER BY staff_no";
         // 声明数据库连接、预处理结果集和结果集变量
         Connection con = null;
         PreparedStatement ps = null;

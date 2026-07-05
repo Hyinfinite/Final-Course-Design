@@ -122,12 +122,13 @@ public class ReservationDAO {
 
             // 2. 插入参会人员（状态未签到）
             if (participantIds != null && !participantIds.isEmpty()) {
-                String partSql = "INSERT INTO participant(reservation_id, participant_staff_id, sign_in_process) VALUES(?, ?, '未签到')";
+                String partSql = "INSERT INTO participant(participant_id, reservation_id, participant_staff_id, sign_in_process) VALUES(?, ?, ?, '未签到')";
                 psPart = con.prepareStatement(partSql);
                 for (int i = 0; i < participantIds.size(); i++) {
                     long staffId = participantIds.get(i);
-                    psPart.setLong(1, reservationId);  // 设置预约ID
-                    psPart.setLong(2, staffId);  // 设置参会人员ID
+                    psPart.setLong(1, i + 1);  // 设置参会人员ID
+                    psPart.setLong(2, reservationId);  // 设置预约ID
+                    psPart.setLong(3, staffId);  // 设置参会人员ID
                     psPart.addBatch();  // 添加到批处理
                 }
                 psPart.executeBatch();  // 批量插入参会人员

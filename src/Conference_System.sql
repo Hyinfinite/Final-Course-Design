@@ -60,7 +60,7 @@ create table confirmation_log (
 );
 
 create table participant (
-	participant_id bigint primary key auto_increment,
+	participant_id bigint primary key,
     reservation_id bigint not null,
     participant_staff_id bigint not null,
     sign_in_process varchar(50) default '未签到',
