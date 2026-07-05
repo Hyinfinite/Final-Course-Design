@@ -525,7 +525,7 @@ public class AdminFrame extends JFrame {
 
         // 创建会议室使用情况表格模型和表格
         DefaultTableModel roomModel = new DefaultTableModel(
-                new Object[]{"会议室ID","会议室","已用分钟","使用率(%)"}, 0) {
+                new Object[]{"会议室ID","会议室","已用次数","使用率(%)"}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable roomTable = new JTable(roomModel);
@@ -556,7 +556,7 @@ public class AdminFrame extends JFrame {
             // 获取并显示会议室使用情况统计
             List<RoomUsageStat> roomStats = dao.roomUsageByMonth(month);
             for (RoomUsageStat s : roomStats) {
-                roomModel.addRow(new Object[]{s.getRoomId(), s.getRoomName(), s.getUsedMinutes(), s.getUsageRate()});
+                roomModel.addRow(new Object[]{s.getRoomId(), s.getRoomName(), s.getUsedCount(), s.getUsageRate()});
             }
 
             // 获取并显示部门会议次数统计

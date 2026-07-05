@@ -54,10 +54,13 @@ public class ReservationDAO {
 
     /**
      * 生成唯一的预约编号
-     * @return 返回格式为"RES"加时间戳加随机数的预约编号
+     * @return 返回格式为"RES" + 时间戳 + 随机数的预约编号
      */
     private String generateReservationNo() {
         return "RES" + System.currentTimeMillis() + String.format("%03d", new Random().nextInt(1000));
+        // 获取当前系统时间的毫秒数（long类型）
+        // 格式化字符串，确保数字部分为3位，不足补0
+        // 生成0-999之间的随机整数
     }
 
     /**
@@ -73,7 +76,6 @@ public class ReservationDAO {
      * @param participantIds 参会人员ID列表
      * @return 添加成功返回true，否则返回false
      */
-    // 新增带参会人员列表的 addReservation 重载方法
     public boolean addReservation(String topic, long deptId, long applicantStaffId, long roomId,
                                   Timestamp start, Timestamp end, int count, String desc,
                                   List<Long> participantIds) {
@@ -87,10 +89,13 @@ public class ReservationDAO {
         PreparedStatement psPart = null;
         try {
             con = SqlUtil.getConnection();
-            if (con == null) return false;
-            con.setAutoCommit(false);  // 开启事务
+            if (con == null) {
+                return false;
+            }
+            con.setAutoCommit(false);  // 开启事务, 关闭自动提交模式, 开启手动事务管理, 保证多个操作的原子性, 可以在出现错误时回滚所有操作
 
             // 1. 插入预约
+            // 创建PreparedStatement时指定RETURN_GENERATED_KEYS参数，用于获取INSERT操作后自动生成的reservation_id
             ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, reservationNo);  // 设置预约编号
             ps.setString(2, topic);  // 设置会议主题
@@ -103,7 +108,7 @@ public class ReservationDAO {
             ps.setString(9, desc);  // 设置会议描述
             int affected = ps.executeUpdate();
             if (affected <= 0) {
-                con.rollback();  // 插入失败，回滚事务
+                con.rollback();  // 插入失败，回滚事务, 撤销所有已经执行的数据库操作
                 return false;
             }
 
@@ -119,9 +124,10 @@ public class ReservationDAO {
             if (participantIds != null && !participantIds.isEmpty()) {
                 String partSql = "INSERT INTO participant(reservation_id, participant_staff_id, sign_in_process) VALUES(?, ?, '未签到')";
                 psPart = con.prepareStatement(partSql);
-                for (Long sid : participantIds) {
+                for (int i = 0; i < participantIds.size(); i++) {
+                    long staffId = participantIds.get(i);
                     psPart.setLong(1, reservationId);  // 设置预约ID
-                    psPart.setLong(2, sid);  // 设置参会人员ID
+                    psPart.setLong(2, staffId);  // 设置参会人员ID
                     psPart.addBatch();  // 添加到批处理
                 }
                 psPart.executeBatch();  // 批量插入参会人员
@@ -132,7 +138,6 @@ public class ReservationDAO {
 
         } catch (Exception e) {
             e.printStackTrace();
-            try { if (con != null) con.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }  // 发生异常，回滚事务
             return false;
         } finally {
             SqlUtil.closeAll(null, psPart, null);  // 关闭参会人员插入的数据库资源
@@ -152,18 +157,18 @@ public class ReservationDAO {
         List<ReservationList> list = new ArrayList<ReservationList>();
 
         // 查询预约列表的SQL语句，包括会议室、申请人信息以及最新的审批意见
-        String sql = "SELECT " +
-                "r.reservation_id, r.reservation_no, r.meeting_topic, " +  // 预约基本信息
-                "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name, " +  // 会议室和申请人信息
-                "cl.confirm_comment, r.participant_count " +  // 参与人数和审批意见
-                "FROM reservation r " +  // 预约表
-                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +  // 关联会议室表
-                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +  // 关联管理员表
-                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +  // 获取最新审批意见
+        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, " +  // 预约基本信息：ID、编号和会议主题
+                "m.room_name, r.start_time, r.end_time, r.reservation_process, a.staff_name, " +  // 会议室和申请人信息：会议室名称、开始时间、结束时间、预约流程状态和申请人姓名
+                "cl.confirm_comment, r.participant_count " +  // 参与人数和审批意见：最新审批意见和参与人数
+                "FROM reservation r " +  // 预约表：主表，包含预约相关信息
+                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +  // 关联会议室表：通过房间ID关联获取会议室名称
+                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +  // 关联管理员表：通过申请人ID关联获取申请人姓名
+                "LEFT JOIN (SELECT reservation_id, confirm_comment " +  // 子查询：获取每个预约的最新审批意见
+                "FROM confirmation_log " +  // 审批日志表
+                "WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log " +  // 子查询：获取每个预约的最大审批ID（即最新审批）
+                "GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +  // 获取最新审批意见
                 "WHERE r.applicant_staff_id = ? " +  // 筛选条件：申请人ID
                 "ORDER BY r.created_at DESC";  // 按创建时间降序排列
-
-
 
         // 数据库相关对象声明
         Connection con = null;  // 数据库连接对象
@@ -252,13 +257,17 @@ public class ReservationDAO {
         // 创建一个ReservationList列表用于存储查询结果
         List<ReservationList> list = new ArrayList<ReservationList>();
         // 编写SQL查询语句，查询待确认的预约信息，包括预约ID、预约编号、会议主题、会议室名称、开始时间、结束时间、预约流程、申请人姓名、确认意见和参与人数
-        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
-                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
-                "FROM reservation r " +
-                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +
-                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +
-                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
-                "WHERE r.reservation_process = '待确认' ORDER BY r.created_at DESC";
+// SQL查询语句，用于获取待确认的会议室预订信息
+        String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +    // 选择预订的基本信息，包括ID、编号、主题和会议室名称
+                "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +    // 选择预订的时间、状态、申请人、确认意见和参与人数
+                "FROM reservation r " +    // 从预订表开始查询
+                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +    // 与会议室表关联，获取会议室名称
+                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +    // 与员工表关联，获取申请人姓名
+                "LEFT JOIN (SELECT reservation_id, confirm_comment " +    // 左连接确认日志表，获取最新的确认意见
+                "FROM confirmation_log " +
+                "WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log " +    // 子查询，获取每个预订ID的最大确认ID
+                "GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +    // 将子查询结果与主查询关联
+                "WHERE r.reservation_process = '待确认' ORDER BY r.created_at DESC";    // 筛选状态为"待确认"的预订，按创建时间降序排列
         // 声明数据库连接、预处理结果集和结果集变量
         Connection con = null;
         PreparedStatement ps = null;
@@ -364,32 +373,37 @@ public class ReservationDAO {
      * @return 预约列表
      */
     public List<ReservationList> searchConfirmedReservationsByDept(long deptId) {
-    // 创建一个空的预约列表用于存储查询结果
+        // 创建一个空的预约列表用于存储查询结果
         List<ReservationList> list = new ArrayList<>();
-    // 定义SQL查询语句，查询已确认且已开始的会议信息
+        // 定义SQL查询语句，查询已确认且已开始的会议信息
+        // SQL查询语句：查询已确认的会议信息
         String sql = "SELECT r.reservation_id, r.reservation_no, r.meeting_topic, m.room_name, " +
                 "r.start_time, r.end_time, r.reservation_process, a.staff_name, cl.confirm_comment, r.participant_count " +
-                "FROM reservation r " +
-                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +  // 关联会议室表
-                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +    // 关联管理员表
-                "LEFT JOIN (SELECT reservation_id, confirm_comment FROM confirmation_log WHERE confirm_id IN (SELECT MAX(confirm_id) FROM confirmation_log GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +  // 关联确认日志表
+                "FROM reservation r " +  // 主表：会议室预约表
+                "JOIN meeting_room m ON r.reservation_room_id = m.room_id " +  // 关联会议室表，获取会议室名称
+                "JOIN admin_staff a ON r.applicant_staff_id = a.staff_id " +    // 关联管理员表，获取申请人姓名
+                "LEFT JOIN (SELECT reservation_id, confirm_comment " +  // 子查询：获取每个预约的最新确认评论
+                "FROM confirmation_log " +
+                "WHERE confirm_id IN (SELECT MAX(confirm_id) " +  // 子查询：获取每个预约的最大确认ID
+                "FROM confirmation_log " +
+                "GROUP BY reservation_id)) cl ON r.reservation_id = cl.reservation_id " +
                 "WHERE r.apply_dept_id = ? AND r.reservation_process = '已确认' " +  // 筛选条件：部门ID和已确认状态
-                "AND r.start_time <= NOW() " +  // 筛选条件：会议已开始
-                "ORDER BY r.start_time DESC";   // 按开始时间降序排列
-    // 初始化数据库连接对象
+                "AND r.start_time <= NOW() " +  // 筛选条件：会议已开始（当前时间在会议开始时间之前）
+                "ORDER BY r.start_time DESC";   // 按开始时间降序排列，最新的会议排在前面
+        // 初始化数据库连接对象
         Connection con = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-        // 获取数据库连接
+            // 获取数据库连接
             con = SqlUtil.getConnection();
             if (con == null) return list;  // 如果连接失败，返回空列表
-        // 创建预处理语句
+            // 创建预处理语句
             ps = con.prepareStatement(sql);
             ps.setLong(1, deptId);  // 设置部门ID参数
-        // 执行查询
+            // 执行查询
             rs = ps.executeQuery();
-        // 遍历结果集，将每条记录转换为ReservationList对象并添加到列表中
+            // 遍历结果集，将每条记录转换为ReservationList对象并添加到列表中
             while (rs.next()) {
                 ReservationList ri = new ReservationList();
                 ri.setReservationId(rs.getLong("reservation_id"));  // 设置预约ID
@@ -407,7 +421,7 @@ public class ReservationDAO {
         } catch (Exception e) {
             e.printStackTrace();  // 打印异常信息
         } finally {
-        // 关闭所有数据库资源
+            // 关闭所有数据库资源
             SqlUtil.closeAll(con, ps, rs);
         }
         return list;  // 返回查询结果列表

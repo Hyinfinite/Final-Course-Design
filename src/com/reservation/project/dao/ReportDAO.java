@@ -15,15 +15,18 @@ public class ReportDAO {
 
     /**
      * 按月份查询会议室使用情况统计
-     * @param month 月份，格式为"yyyy-MM"
-     * @return 会议室使用统计列表，每个统计包含会议室ID、名称、使用分钟数和使用率
+     * @param yearMonth 年份与月份，格式为"yyyy-MM"
+     * @return 会议室使用统计列表，每个统计包含会议室ID、名称、使用次数和使用率
      */
-    public List<RoomUsageStat> roomUsageByMonth(String month) {
+    public List<RoomUsageStat> roomUsageByMonth(String yearMonth) {
         // 初始化返回结果列表
         List<RoomUsageStat> list = new ArrayList<RoomUsageStat>();
         // SQL查询语句：统计各会议室在指定月份的使用情况
         String sql = "SELECT m.room_id , m.room_name, " +
-                "COALESCE(SUM(TIMESTAMPDIFF(MINUTE, r.start_time, r.end_time)),0) AS used_minutes " +
+                "COUNT(r.reservation_id) AS used_count, " +
+                "(SELECT COUNT(*) FROM reservation " +
+                "WHERE reservation_process = '已确认' " +
+                "AND DATE_FORMAT(start_time, '%Y-%m') = ?) AS total_count " +
                 "FROM meeting_room m " +
                 "LEFT JOIN reservation r ON m.room_id = r.reservation_room_id " +
                 "AND r.reservation_process = '已确认' " +
@@ -42,7 +45,8 @@ public class ReportDAO {
             }
             // 准备SQL语句
             ps = con.prepareStatement(sql);
-            ps.setString(1, month);
+            ps.setString(1, yearMonth);
+            ps.setString(2, yearMonth);
             // 执行查询
             rs = ps.executeQuery();
             // 处理查询结果
@@ -50,10 +54,12 @@ public class ReportDAO {
                 RoomUsageStat x = new RoomUsageStat();
                 x.setRoomId(rs.getLong("room_id"));
                 x.setRoomName(rs.getString("room_name"));
-                double used = rs.getDouble("used_minutes");
-                x.setUsedMinutes(used);
-                // 计算使用率（14400分钟=24小时*30天，即一个月的总分钟数），保留2位小数
-                x.setUsageRate(Math.round((used / 14400.0) * 10000.0) / 100.0); // 保留2位
+                long usedCount = rs.getLong("used_count");
+                long totalCount = rs.getLong("total_count");
+                x.setUsedCount(usedCount);
+                // 计算使用率，保留2位小数
+                double usageRate = (double) usedCount / totalCount;
+                x.setUsageRate(Math.round(usageRate * 100.0));
                 list.add(x);
             }
         } catch (Exception e) {
@@ -67,10 +73,10 @@ public class ReportDAO {
 
     /**
      * 按月份查询各部门会议数量统计
-     * @param month 月份，格式为"yyyy-MM"
+     * @param yearMonth 年份与月份，格式为"yyyy-MM"
      * @return 部门会议统计列表，每个统计包含部门ID、名称和会议数量
      */
-    public List<DeptMeetingStat> deptMeetingCountByMonth(String month) {
+    public List<DeptMeetingStat> deptMeetingCountByMonth(String yearMonth) {
         // 初始化返回结果列表
         List<DeptMeetingStat> list = new ArrayList<DeptMeetingStat>();
         // SQL查询语句：统计各部门在指定月份的会议数量
@@ -93,7 +99,7 @@ public class ReportDAO {
             }
             // 准备SQL语句
             ps = con.prepareStatement(sql);
-            ps.setString(1, month);
+            ps.setString(1, yearMonth);
             // 执行查询
             rs = ps.executeQuery();
             // 处理查询结果

@@ -3,7 +3,7 @@ package com.reservation.project.model;
 public class RoomUsageStat {
     private long roomId;
     private String roomName;
-    private double usedMinutes;
+    private long usedCount;
     private double usageRate;
 
     public long getRoomId() {
@@ -22,12 +22,12 @@ public class RoomUsageStat {
         this.roomName = roomName;
     }
 
-    public double getUsedMinutes() {
-        return usedMinutes;
+    public long getUsedCount() {
+        return usedCount;
     }
 
-    public void setUsedMinutes(double usedMinutes) {
-        this.usedMinutes = usedMinutes;
+    public void setUsedCount(long usedCount) {
+        this.usedCount = usedCount;
     }
 
     public double getUsageRate() {

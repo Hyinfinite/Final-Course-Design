@@ -159,11 +159,6 @@ public class ParticipantDAO {
     }
 
     /**
-     * 根据预约ID获取该会议的所有参会人员签到记录（用于显示名单）
-     * @param reservationId 预约ID
-     * @return 参会人员列表
-     */
-    /**
      * 根据预约ID查询参与者列表
      * @param reservationId 预约ID
      * @return 参与者列表，如果查询失败则返回空列表
