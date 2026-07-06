@@ -1,8 +1,8 @@
 package com.reservation.project.dao;
 
 import com.reservation.project.model.ReservationList;
-import com.reservation.project.util.ReservationNOUtil;
 import com.reservation.project.util.SqlUtil;
+import com.reservation.project.util.ReservationNoUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -53,17 +53,6 @@ public class ReservationDAO {
     }
 
     /**
-     * 生成唯一的预约编号
-     * @return 返回格式为"RES" + 时间戳 + 随机数的预约编号
-     */
-    private String generateReservationNo() {
-        return "RES" + System.currentTimeMillis() + String.format("%03d", new Random().nextInt(1000));
-        // 获取当前系统时间的毫秒数（long类型）
-        // 格式化字符串，确保数字部分为3位，不足补0
-        // 生成0-999之间的随机整数
-    }
-
-    /**
      * 添加新的会议室预约，包含参会人员列表
      * @param topic 会议主题
      * @param deptId 申请部门ID
@@ -79,7 +68,7 @@ public class ReservationDAO {
     public boolean addReservation(String topic, long deptId, long applicantStaffId, long roomId,
                                   Timestamp start, Timestamp end, int count, String desc,
                                   List<Long> participantIds) {
-        String reservationNo = generateReservationNo();  // 生成预约编号
+        String reservationNo = ReservationNoUtil.ReservationNo();  // 生成预约编号
         // 插入预约的SQL语句
         String sql = "INSERT INTO reservation(reservation_no, meeting_topic, apply_dept_id, applicant_staff_id, " +
                 "reservation_room_id, start_time, end_time, participant_count, meeting_desc) " +
