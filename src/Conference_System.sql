@@ -41,7 +41,6 @@ create table reservation (
     participant_count int not null,
     meeting_desc varchar(1000),
     reservation_process varchar(50) not null default '待确认',
-    reservation_comment varchar(500),
     created_at datetime default current_timestamp,
     foreign key (apply_dept_id) references department (dept_id),
     foreign key (applicant_staff_id) references admin_staff (staff_id),
@@ -60,7 +59,7 @@ create table confirmation_log (
 );
 
 create table participant (
-	participant_id bigint primary key,
+	participant_id bigint primary key auto_increment,
     reservation_id bigint not null,
     participant_staff_id bigint not null,
     sign_in_process varchar(50) default '未签到',

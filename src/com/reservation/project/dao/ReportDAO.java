@@ -60,6 +60,9 @@ public class ReportDAO {
                 // 计算使用率，保留2位小数
                 double usageRate = (double) usedCount / totalCount;
                 x.setUsageRate(Math.round(usageRate * 100.0));
+                // 添加控制台输出
+                System.out.printf("会议室ID: %d, 名称: %s, 使用次数: %d, 使用率: %.1f%%%n",
+                        x.getRoomId(), x.getRoomName(), x.getUsedCount(), x.getUsageRate());
                 list.add(x);
             }
         } catch (Exception e) {

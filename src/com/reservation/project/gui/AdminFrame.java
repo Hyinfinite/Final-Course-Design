@@ -626,7 +626,10 @@ public class AdminFrame extends JFrame {
         // 创建会议室使用情况表格模型和表格
         DefaultTableModel roomModel = new DefaultTableModel(
                 new Object[]{"会议室ID","会议室","已用次数","使用率(%)"}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable roomTable = new JTable(roomModel);
         roomTable.setRowHeight(26);

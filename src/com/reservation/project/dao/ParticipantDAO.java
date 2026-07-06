@@ -190,13 +190,12 @@ public class ParticipantDAO {
             ps.setLong(1, reservationId);
             // 执行查询
             rs = ps.executeQuery();
-            int participantId = 1;  // 用于记录当前参与者的ID
             // 遍历查询结果集
             while (rs.next()) {
                 // 创建参与者对象
                 Participant x = new Participant();
                 // 设置参与者属性
-                x.setParticipantId(participantId);
+                x.setParticipantId(rs.getLong("participant_id"));
                 x.setReservationId(rs.getLong("reservation_id"));
                 x.setReservationNo(rs.getString("reservation_no"));
                 x.setMeetingTopic(rs.getString("meeting_topic"));
@@ -210,7 +209,6 @@ public class ParticipantDAO {
                 x.setSignInTime(rs.getTimestamp("sign_in_time") == null ? "" : String.valueOf(rs.getTimestamp("sign_in_time")));
                 // 将参与者添加到列表中
                 list.add(x);
-                participantId++;  // 更新当前参与者的ID
             }
         } catch (Exception e) {
             // 打印异常信息
