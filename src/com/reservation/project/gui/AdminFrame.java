@@ -199,12 +199,20 @@ public class AdminFrame extends JFrame {
 
         // 操作面板，包含输入框、复选框和按钮
         JPanel op = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        op.add(new JLabel("编号")); op.add(tfCode);
-        op.add(new JLabel("名称")); op.add(tfName);
-        op.add(new JLabel("位置")); op.add(tfLoc);
-        op.add(new JLabel("容量")); op.add(tfCap);
-        op.add(cbProj); op.add(cbAudio);
-        op.add(btnAdd); op.add(btnUpd); op.add(btnDel); op.add(btnRef);
+        op.add(new JLabel("编号"));
+        op.add(tfCode);
+        op.add(new JLabel("名称"));
+        op.add(tfName);
+        op.add(new JLabel("位置"));
+        op.add(tfLoc);
+        op.add(new JLabel("容量"));
+        op.add(tfCap);
+        op.add(cbProj);
+        op.add(cbAudio);
+        op.add(btnAdd);
+        op.add(btnUpd);
+        op.add(btnDel);
+        op.add(btnRef);
 
         // 创建DAO对象，用于数据库操作
         MeetingRoomManageDAO dao = new MeetingRoomManageDAO();
