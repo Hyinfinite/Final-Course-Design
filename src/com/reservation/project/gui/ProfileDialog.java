@@ -43,11 +43,14 @@ public class ProfileDialog extends JDialog {
         setLocationRelativeTo(owner);
         setLayout(new BorderLayout(8, 8));
 
+        // 创建一个使用TabbedPane布局的面板，并添加两个标签页
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("个人信息", buildProfilePanel());
         tabs.addTab("修改密码", buildPasswordPanel());
 
+        // 添加标签页面板
         add(tabs, BorderLayout.CENTER);
+        // 显示对话框
         loadProfile();
     }
 
@@ -95,13 +98,9 @@ public class ProfileDialog extends JDialog {
             }
 
             // 调用DAO更新用户信息
-            boolean ok = dao.updateOwnProfile(
-                    loginUser.getStaffId(),
-                    tfStaffNo.getText().trim(),
-                    tfName.getText().trim(),
-                    tfGender.getText().trim(),
-                    tfPos.getText().trim(),
-                    tfPhone.getText().trim()
+            boolean ok = dao.updateOwnProfile(loginUser.getStaffId(), tfStaffNo.getText().trim(),
+                    tfName.getText().trim(), tfGender.getText().trim(),
+                    tfPos.getText().trim(), tfPhone.getText().trim()
             );
             JOptionPane.showMessageDialog(this, ok ? "保存成功" : "保存失败");
         });

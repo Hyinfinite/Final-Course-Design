@@ -373,14 +373,25 @@ public class AdminFrame extends JFrame {
 
         // 操作面板，包含输入框、下拉框和按钮
         JPanel op = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        op.add(new JLabel("工号")); op.add(tfNo);
-        op.add(new JLabel("姓名")); op.add(tfName);
-        op.add(new JLabel("部门ID")); op.add(tfDept);
-        op.add(new JLabel("性别")); op.add(tfGender);
-        op.add(new JLabel("职务")); op.add(tfPos);
-        op.add(new JLabel("电话")); op.add(tfPhone);
-        op.add(new JLabel("角色")); op.add(cbRole);
-        op.add(btnAdd); op.add(btnUpd); op.add(btnReset); op.add(btnSetManager); op.add(btnRef);
+        op.add(new JLabel("工号"));
+        op.add(tfNo);
+        op.add(new JLabel("姓名"));
+        op.add(tfName);
+        op.add(new JLabel("部门ID"));
+        op.add(tfDept);
+        op.add(new JLabel("性别"));
+        op.add(tfGender);
+        op.add(new JLabel("职务"));
+        op.add(tfPos);
+        op.add(new JLabel("电话"));
+        op.add(tfPhone);
+        op.add(new JLabel("角色"));
+        op.add(cbRole);
+        op.add(btnAdd);
+        op.add(btnUpd);
+        op.add(btnReset);
+        op.add(btnSetManager);
+        op.add(btnRef);
 
         // 创建DAO对象，用于数据库操作
         StaffDAO dao = new StaffDAO();
@@ -534,10 +545,14 @@ public class AdminFrame extends JFrame {
 
         // 操作面板，包含输入框和按钮
         JPanel op = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        op.add(new JLabel("日期(yyyy-MM-dd)")); op.add(tfDate);
-        op.add(new JLabel("部门ID")); op.add(tfDeptId);
-        op.add(new JLabel("会议室ID")); op.add(tfRoomId);
-        op.add(btnQuery); op.add(btnReset);
+        op.add(new JLabel("日期(yyyy-MM-dd)"));
+        op.add(tfDate);
+        op.add(new JLabel("部门ID"));
+        op.add(tfDeptId);
+        op.add(new JLabel("会议室ID"));
+        op.add(tfRoomId);
+        op.add(btnQuery);
+        op.add(btnReset);
 
         // 创建DAO对象，用于数据库操作
         ReservationQueryDAO dao = new ReservationQueryDAO();
@@ -703,28 +718,14 @@ public class AdminFrame extends JFrame {
         JPasswordField confirmPwd = new JPasswordField(16);  // 确认密码输入框，设置长度为16
         JButton btnSave = new JButton("保存修改");  // 保存修改按钮
 
-        // 创建水平面板，用于排列标签和输入框
-        JPanel oldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 旧密码面板
-        oldPanel.add(new JLabel("旧密码"));  // 添加旧密码标签
-        oldPanel.add(oldPwd);  // 添加旧密码输入框
-
-        JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 新密码面板
-        newPanel.add(new JLabel("新密码"));  // 添加新密码标签
-        newPanel.add(newPwd);  // 添加新密码输入框
-
-        JPanel confirmPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));  // 确认密码面板
-        confirmPanel.add(new JLabel("确认新密码"));  // 添加确认密码标签
-        confirmPanel.add(confirmPwd);  // 添加确认密码输入框
-
-        // 创建按钮面板，用于居中显示按钮
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 5));  // 按钮面板
-        btnPanel.add(btnSave);  // 添加保存按钮
-
-        // 将所有组件添加到主面板
-        panel.add(oldPanel);  // 添加旧密码面板
-        panel.add(newPanel);  // 添加新密码面板
-        panel.add(confirmPanel);  // 添加确认密码面板
-        panel.add(btnPanel);  // 添加按钮面板
+        // 添加所有组件到主面板
+        panel.add(new JLabel("旧密码"));
+        panel.add(oldPwd);
+        panel.add(new JLabel("新密码"));
+        panel.add(newPwd);
+        panel.add(new JLabel("确认新密码"));
+        panel.add(confirmPwd);
+        panel.add(btnSave);
 
         // 创建DAO对象，用于数据库操作
         StaffDAO dao = new StaffDAO();

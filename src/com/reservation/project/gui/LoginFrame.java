@@ -22,14 +22,10 @@ public class LoginFrame extends JFrame {
      * 构造方法，初始化登录窗口
      */
     public LoginFrame() {
-        // 设置窗口标题
-        setTitle("会议预约管理系统 - 登录");
-        // 设置窗口大小为420x260像素
-        setSize(420, 260);
-        // 设置窗口居中显示
-        setLocationRelativeTo(null);
-        // 设置关闭窗口时退出程序
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("会议预约管理系统 - 登录");  // 设置窗口标题
+        setSize(420, 260);  // 设置窗口大小为420x260像素
+        setLocationRelativeTo(null);  // 设置窗口居中显示
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // 设置关闭窗口时退出程序
 
         // 最外层使用 FlowLayout，通过它来制造左右和上下的边缘留白
         setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
@@ -53,22 +49,16 @@ public class LoginFrame extends JFrame {
 
         // 创建按钮面板，使用左对齐的流式布局
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        // 创建登录按钮
-        JButton btnLogin = new JButton("登录");
-        // 将登录按钮添加到按钮面板
-        btnPanel.add(btnLogin);
-        // 添加空标签用于占位
-        container.add(new JLabel());
-        // 将按钮面板添加到容器
-        container.add(btnPanel);
+        JButton btnLogin = new JButton("登录");  // 创建登录按钮
+        btnPanel.add(btnLogin);  // 将登录按钮添加到按钮面板
+        container.add(new JLabel());  // 添加空标签用于占位
+        container.add(btnPanel);  // 将按钮面板添加到容器
 
         // 为登录按钮添加点击事件监听器，点击时调用doLogin方法
         btnLogin.addActionListener(e -> doLogin());
 
-        // 将容器添加到窗口
-        add(container);
-        // 设置窗口可见
-        setVisible(true);
+        add(container);  // 将容器添加到窗口
+        setVisible(true);  // 设置窗口可见
     }
 
     /**

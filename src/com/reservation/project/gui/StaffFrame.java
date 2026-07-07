@@ -189,12 +189,17 @@ public class StaffFrame extends JFrame {
         // 为全选和取消全选按钮添加事件监听器
         // btnSelectAll按钮点击时，将所有员工复选框设置为选中状态，并更新选中计数
         btnSelectAll.addActionListener(e -> {
-            staffCheckBoxes.forEach(cb -> cb.setSelected(true));
+            for (JCheckBox cb : staffCheckBoxes) {
+                cb.setSelected(true);
+            }
             updateSelectedCount();
         });
+
         // btnDeselectAll按钮点击时，将所有员工复选框设置为未选中状态，并更新选中计数
         btnDeselectAll.addActionListener(e -> {
-            staffCheckBoxes.forEach(cb -> cb.setSelected(false));
+            for (JCheckBox cb : staffCheckBoxes) {
+                cb.setSelected(false);
+            }
             updateSelectedCount();
         });
 
@@ -275,7 +280,8 @@ public class StaffFrame extends JFrame {
         // 创建使用右对齐FlowLayout布局的操作面板
         JPanel op = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         // 将按钮添加到操作面板
-        op.add(btnRefresh); op.add(btnCancel);
+        op.add(btnRefresh);
+        op.add(btnCancel);
 
         // 为刷新按钮添加动作监听器，点击时加载用户预约信息
         btnRefresh.addActionListener(e -> loadMyReservations());
@@ -284,7 +290,10 @@ public class StaffFrame extends JFrame {
             // 获取用户选中的表格行
             int row = table.getSelectedRow();
             // 如果没有选中任何行，提示用户并返回
-            if (row < 0) { JOptionPane.showMessageDialog(this, "请先选中一条记录"); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "请先选中一条记录");
+                return;
+            }
             // 获取选中行的预约ID
             long reservationId = Long.parseLong(myModel.getValueAt(row, 0).toString());
             // 调用ReservationDAO取消预约，传入预约ID和员工ID
@@ -334,7 +343,9 @@ public class StaffFrame extends JFrame {
             // 调用DAO查询指定日期的空闲房间信息
             List<String[]> list = new RoomAvailabilityDAO().queryByDate(tfDate.getText().trim());
             // 将查询结果逐行添加到表格模型中
-            for (String[] x : list) freeModel.addRow(x);
+            for (String[] x : list) {
+                freeModel.addRow(x);
+            }
         });
 
         // 将顶部面板添加到主面板的北部，将带滚动条的表格添加到中心区域
@@ -559,10 +570,10 @@ public class StaffFrame extends JFrame {
             }
 
             // 4. 参会人员（勾选）
-            List<Long> selectedStaffIds = staffCheckBoxes.stream()
-                    .filter(JCheckBox::isSelected)
-                    .map(cb -> (Long) cb.getClientProperty("staffId"))
-                    .collect(Collectors.toList());
+            List<Long> selectedStaffIds = staffCheckBoxes.stream()  // 使用流处理
+                    .filter(JCheckBox::isSelected)  // 筛选已勾选的复选框
+                    .map(cb -> (Long) cb.getClientProperty("staffId"))  // 把JCheckBox对象转换为了Long类型的员工ID
+                    .collect(Collectors.toList());  // 转换为列表
             // 确保当前用户在参会人员列表中
             if (!selectedStaffIds.contains(user.getStaffId())) {
                 selectedStaffIds.add(user.getStaffId());
